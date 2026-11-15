@@ -1,0 +1,211 @@
+@import "tailwindcss";
+
+/* Varian kustom:
+   rail: = layar lebar + cukup tinggi + boleh animasi → Projects jadi rel horizontal
+   fine: = ada mouse (bukan layar sentuh) */
+@custom-variant rail (@media (min-width: 1024px) and (min-height: 700px) and (prefers-reduced-motion: no-preference));
+@custom-variant fine (@media (hover: hover) and (pointer: fine));
+
+/* ============================================================
+   DESIGN TOKENS — acid graphics / cyber-brutalist
+   Semua warna, font, dan ukuran diatur dari sini.
+   ============================================================ */
+@theme {
+  /* Palet */
+  --color-acid: #c6ff00; /* lime neon — aksen utama, teks di atas hitam */
+  --color-ink: #000000; /* latar utama */
+  --color-paper: #ffffff; /* teks utama di atas hitam */
+  --color-volt: #3b2bff; /* biru elektrik — HANYA sebagai bidang/fill, teksnya putih */
+  --color-violet: #b18cff; /* aksen ungu — cukup terang buat teks kecil di atas hitam */
+  --color-ash: #9a9a9a; /* teks sekunder (kontras 7.4:1 di atas hitam) */
+  --color-line: #2b2b2b; /* garis/border halus */
+
+  /* Font */
+  --font-display: "Archivo Variable", "Arial Black", system-ui, sans-serif;
+  --font-mono: "Space Mono", ui-monospace, "JetBrains Mono", monospace;
+
+  /* Skala tipe (rasio ~1.333, judul pakai clamp biar fluid) */
+  --text-micro: 0.6875rem; /* 11px — label dekorasi, koordinat */
+  --text-small: 0.8125rem; /* 13px — meta, caption */
+  --text-body: 1rem; /* 16px — teks baca */
+  --text-lead: 1.25rem; /* 20px — paragraf pembuka */
+  --text-h3: clamp(1.5rem, 1.2rem + 1.2vw, 2.25rem);
+  --text-h2: clamp(2.25rem, 1.4rem + 3.6vw, 4.5rem);
+  --text-h1: clamp(3rem, 1rem + 9vw, 9.5rem);
+  --text-hero: clamp(3.5rem, min(19vw, 26svh), 20rem); /* kata raksasa di hero */
+  --text-mega: clamp(3.25rem, 13vw, 13rem); /* judul bab */
+
+  /* Ukuran dekorasi */
+  --stripe: 14px; /* lebar satu garis hazard */
+  --px: 6px; /* ukuran satu "pixel" glyph */
+
+  /* Motion */
+  --ease-snap: cubic-bezier(0.2, 0.9, 0.1, 1);
+  --dur-fast: 120ms;
+  --dur-base: 320ms;
+}
+
+/* ---------- Base ---------- */
+/* Warna "panggung": diganti JS tiap pindah bab (lihat src/lib/stage.ts).
+   --stage-dark = latar, --stage-light = warna dither/aksen, --stage-fg = teks. */
+:root {
+  --stage-dark: #000000;
+  --stage-light: #c6ff00;
+  --stage-fg: #ffffff;
+}
+
+html {
+  scroll-padding-top: 4.5rem;
+  background: var(--stage-dark);
+  color: var(--stage-fg);
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--font-mono);
+  font-size: var(--text-body);
+  line-height: 1.65;
+}
+
+::selection {
+  background: var(--stage-light);
+  color: var(--stage-dark);
+}
+
+:focus-visible {
+  outline: 2px solid var(--stage-light);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ---------- Utility yang ngikutin warna panggung ---------- */
+@utility panel {
+  background: var(--stage-dark);
+}
+@utility text-accent {
+  color: var(--stage-light);
+}
+@utility bg-accent {
+  background: var(--stage-light);
+  color: var(--stage-dark);
+}
+@utility text-dim {
+  color: color-mix(in srgb, var(--stage-fg) 78%, var(--stage-dark));
+}
+@utility line-fg {
+  border-color: color-mix(in srgb, var(--stage-fg) 30%, transparent);
+}
+/* Teks raksasa yang "motong" scene 3D: putih di latar, kebalik warnanya pas numpuk di atas kubus */
+@utility cut {
+  color: #fff;
+  mix-blend-mode: difference;
+}
+
+/* ---------- Tipografi ---------- */
+@utility display {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-stretch: 125%;
+  line-height: 0.88;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+}
+
+/* Teks bertumpuk: salinan outline di belakang judul (dekorasi, bukan konten) */
+@utility text-stack {
+  /* --sx / --sy digerakin mouse di hero (default 1) */
+  text-shadow:
+    calc(var(--sx, 1) * 0.045em) calc(var(--sy, 1) * 0.045em) 0 var(--color-volt),
+    calc(var(--sx, 1) * 0.09em) calc(var(--sy, 1) * 0.09em) 0 var(--color-ink),
+    calc(var(--sx, 1) * 0.1em) calc(var(--sy, 1) * 0.1em) 0 var(--color-acid);
+}
+
+/* ---------- Dekorasi ---------- */
+@utility hazard {
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--color-acid) 0 var(--stripe),
+    var(--color-ink) var(--stripe) calc(var(--stripe) * 2)
+  );
+}
+
+@utility hazard-volt {
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--color-volt) 0 var(--stripe),
+    var(--color-paper) var(--stripe) calc(var(--stripe) * 2)
+  );
+}
+
+/* Grid pixel halus buat latar panel */
+@utility grid-px {
+  background-image:
+    linear-gradient(var(--color-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-line) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Scanline CSS — fallback ringan pengganti post-processing di mobile */
+@utility scanlines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgb(0 0 0 / 0.35) 0 1px,
+    transparent 1px 3px
+  );
+  pointer-events: none;
+}
+
+/* Sudut crosshair di 4 pojok elemen (elemen harus relative) */
+@utility corners {
+  --c: var(--color-acid);
+  --len: 12px;
+  background:
+    linear-gradient(var(--c), var(--c)) top left / var(--len) 1px,
+    linear-gradient(var(--c), var(--c)) top left / 1px var(--len),
+    linear-gradient(var(--c), var(--c)) top right / var(--len) 1px,
+    linear-gradient(var(--c), var(--c)) top right / 1px var(--len),
+    linear-gradient(var(--c), var(--c)) bottom left / var(--len) 1px,
+    linear-gradient(var(--c), var(--c)) bottom left / 1px var(--len),
+    linear-gradient(var(--c), var(--c)) bottom right / var(--len) 1px,
+    linear-gradient(var(--c), var(--c)) bottom right / 1px var(--len);
+  background-repeat: no-repeat;
+}
+
+/* Pola Bayer 4x4 buat dither CSS (thumbnail project pas hover) */
+@utility bayer {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAAAAACMmsGiAAAAHUlEQVR4nGNgb1dfznDc/Xk6g/l28ekM38uvhwMAR/QH8YJXPesAAAAASUVORK5CYII=");
+  background-size: 8px 8px;
+  image-rendering: pixelated;
+}
+
+/* ---------- Boot screen & cursor ---------- */
+html.is-booting {
+  overflow: hidden;
+}
+html.has-cursor,
+html.has-cursor * {
+  cursor: none !important;
+}
+html.has-cursor input {
+  cursor: text !important;
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .boot {
+    display: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
