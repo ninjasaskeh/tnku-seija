@@ -1,18 +1,18 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { skills } from "@/data/profile";
+import { useMemo, useRef, useState } from "react";
+import type { SkillGroup } from "@/lib/content-types";
 import { gsap, MOTION_OK, useGSAP } from "@/lib/gsap";
 
-const GROUPS = skills.map((s) => s.group);
-const ROWS = skills.flatMap((s) => s.items.map((name) => ({ name, layer: s.group })));
 
 /**
  * Query builder beneran: klik layer buat ngubah klausa WHERE, tabel hasilnya ikut berubah.
  * Kosong (nggak ada filter) = semua layer.
  * Hasil query diumumin ke screen reader lewat role="status".
  */
-export function SkillQuery() {
+export function SkillQuery({ skills }: { skills: SkillGroup[] }) {
+  const GROUPS = useMemo(() => skills.map((s) => s.group), [skills]);
+  const ROWS = useMemo(() => skills.flatMap((s) => s.items.map((name) => ({ name, layer: s.group }))), [skills]);
   const [on, setOn] = useState<string[]>(GROUPS);
   const table = useRef<HTMLTableSectionElement>(null);
   const rows = ROWS.filter((r) => on.includes(r.layer));

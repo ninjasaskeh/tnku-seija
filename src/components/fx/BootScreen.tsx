@@ -3,11 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { markBooted } from "@/lib/boot";
 import { gsap } from "@/lib/gsap";
-import { profile } from "@/data/profile";
+import { useContent } from "@/components/ContentProvider";
 
-const LINES: [string, string][] = [
-  [`Resolving ${profile.domain}`, "12ms"],
-  [`Connected to ${profile.domain} port 443`, "24ms"],
+const lines = (domain: string): [string, string][] => [
+  [`Resolving ${domain}`, "12ms"],
+  [`Connected to ${domain} port 443`, "24ms"],
   ["TLS 1.3 handshake", "38ms"],
   ["Sending GET /you HTTP/2", "41ms"],
 ];
@@ -25,6 +25,7 @@ const BOOT_KEY = "portfolio:booted"; // sama dengan script di layout.tsx & previ
  * - Bisa dilewati (klik / tombol apa aja). Reduced motion: disembunyiin lewat CSS.
  */
 export function BootScreen() {
+  const { profile } = useContent();
   const root = useRef<HTMLDivElement>(null);
   const [done, setDone] = useState(false);
 
@@ -135,7 +136,7 @@ export function BootScreen() {
           <p className="text-acid">$ curl -i https://{profile.domain}/you</p>
           {/* semua baris mulai `invisible` dari HTML server → nggak ada kedip sebelum JS jalan */}
           <ul aria-hidden="true" className="mt-5 max-w-[34rem] space-y-1">
-            {LINES.map(([l, t]) => (
+            {lines(profile.domain).map(([l, t]) => (
               <li key={l} data-line className="invisible flex gap-3">
                 <span className="text-ash">*</span>
                 <span className="min-w-0 flex-1 truncate">{l}</span>

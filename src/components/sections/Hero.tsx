@@ -1,6 +1,6 @@
 import { Reassemble } from "@/components/fx/Reassemble";
 import { RequestHeaders } from "@/components/fx/RequestHeaders";
-import { profile } from "@/data/profile";
+import type { Profile } from "@/lib/content-types";
 import { HeroFx } from "./HeroFx";
 
 /**
@@ -8,7 +8,7 @@ import { HeroFx } from "./HeroFx";
  * "GET" di kiri atas, "/YOU" di kanan bawah, paket 3D (amplop) melayang di antaranya.
  * Hurufnya dateng sebagai paket acak (Reassemble). Kata raksasanya pake `cut` (blend difference).
  */
-export function Hero() {
+export function Hero({ profile }: { profile: Profile }) {
   return (
     <section
       id="top"

@@ -1,12 +1,12 @@
 import { SkillQuery } from "@/components/fx/SkillQuery";
 import { HopHeading } from "@/components/layout/Hop";
-import { skills } from "@/data/profile";
+import type { SkillGroup } from "@/lib/content-types";
 
 /**
  * Hop 04 — Query. Request udah sampai database: skill = isi tabel `skills`.
  * Tabelnya bisa difilter (WHERE layer IN ...). Database 3D muter di kanan.
  */
-export function Skills() {
+export function Skills({ skills }: { skills: SkillGroup[] }) {
   const total = skills.reduce((n, s) => n + s.items.length, 0);
   return (
     <section
@@ -23,7 +23,7 @@ export function Skills() {
               Deepest hop. {total} rows across {skills.length} layers: the tools the request touched to get here.
               Filter the query to narrow it down.
             </p>
-            <SkillQuery />
+            <SkillQuery skills={skills} />
           </div>
         </div>
       </div>

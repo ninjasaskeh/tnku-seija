@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import type { Project } from "@/data/projects";
+import type { Project } from "@/lib/content-types";
 
 function Art({ project, index, id }: { project: Project; index: number; id: string }) {
   if (project.thumbnail) {

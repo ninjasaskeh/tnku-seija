@@ -235,6 +235,19 @@ body {
   color: var(--stage-dark);
 }
 
+/* Panel chat mengambang kebuka: "dikirim" dari bawah, patah-patah */
+.chat-pop {
+  animation: chat-pop 220ms steps(5) both;
+}
+@keyframes chat-pop {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
 /* Kursor blok kedip ala terminal */
 @utility caret {
   display: inline-block;

@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { ProjectThumb } from "@/components/ProjectThumb";
 import { HopHeading } from "@/components/layout/Hop";
-import { type Project, projects } from "@/data/projects";
+import { useContent } from "@/components/ContentProvider";
+import type { Project } from "@/lib/content-types";
 import { gsap, MOTION_OK, RAIL, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { lenisRef } from "@/lib/lenis";
 import { setProject } from "@/lib/stage";
@@ -21,6 +22,7 @@ export function Projects() {
   const pin = useRef<HTMLDivElement>(null);
   const trigger = useRef<ScrollTrigger | null>(null);
   const [active, setActive] = useState(0);
+  const { projects } = useContent();
   const n = projects.length;
 
   useGSAP(() => {

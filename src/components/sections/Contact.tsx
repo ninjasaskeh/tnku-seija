@@ -5,7 +5,7 @@ import { Rtt } from "@/components/fx/NetStatus";
 import { RoundTrip } from "@/components/fx/RoundTrip";
 import { Scramble } from "@/components/fx/Scramble";
 import { HopHeading } from "@/components/layout/Hop";
-import { profile } from "@/data/profile";
+import type { Profile } from "@/lib/content-types";
 import { ContactFx } from "./ContactFx";
 
 /**
@@ -13,7 +13,7 @@ import { ContactFx } from "./ContactFx";
  * Kontak ditulis sebagai header response; email = header Location.
  * Di bawah: total round trip (lama pengunjung di halaman) + nama raksasa.
  */
-export function Contact() {
+export function Contact({ profile }: { profile: Profile }) {
   return (
     <section
       id="contact"

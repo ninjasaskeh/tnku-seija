@@ -1,0 +1,107 @@
+// Skema database portfolio.
+// - Konten (Profile, SkillGroup, Project): diedit lewat /admin, dibaca halaman utama (di-cache, tag "content").
+// - ChatSession / ChatMessage: log percakapan terminal AI + dasar rate limit.
+// - PageEvent: analytics anonim (kunjungan & hop yang dibuka).
+// Privasi: IP pengunjung nggak pernah disimpan, cuma hash-nya (ipHash = sha256(IP_SALT + ip)).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Satu baris aja (id = 1).
+model Profile {
+  id            Int      @id @default(1)
+  name          String
+  domain        String
+  role          String
+  location      String
+  tagline       String
+  /// paragraf bio, urut
+  bio           String[]
+  /// [{ label, value }]
+  facts         Json
+  /// [{ label, href }]
+  socials       Json
+  email         String
+  timezone      String
+  timezoneLabel String
+  updatedAt     DateTime @updatedAt
+}
+
+model SkillGroup {
+  id    Int      @id @default(autoincrement())
+  name  String
+  items String[]
+  order Int      @default(0)
+}
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  slug        String   @unique
+  title       String
+  year        String
+  role        String
+  description String
+  stack       String[]
+  liveUrl     String?
+  repoUrl     String?
+  thumbnail   String?
+  order       Int      @default(0)
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ChatSession {
+  id        String        @id @default(cuid())
+  ipHash    String
+  userAgent String?
+  createdAt DateTime      @default(now())
+  messages  ChatMessage[]
+
+  @@index([createdAt])
+}
+
+model ChatMessage {
+  id           Int         @id @default(autoincrement())
+  sessionId    String
+  session      ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  /// "user" | "assistant"
+  role         String
+  content      String
+  ipHash       String
+  /// diisi buat pesan assistant
+  model        String?
+  inputTokens  Int?
+  outputTokens Int?
+  /// "end_turn" | "refusal" | "error" | ...
+  stopReason   String?
+  createdAt    DateTime    @default(now())
+
+  @@index([ipHash, createdAt])
+  @@index([sessionId, createdAt])
+  @@index([role, createdAt])
+}
+
+model PageEvent {
+  id        Int      @id @default(autoincrement())
+  /// id acak per tab (sessionStorage), bukan identitas orang
+  visitId   String
+  /// "view" | "hop"
+  type      String
+  hop       String?
+  path      String?
+  /// cuma hostname referrer
+  referrer  String?
+  /// "desktop" | "mobile"
+  device    String?
+  createdAt DateTime @default(now())
+
+  @@index([type, createdAt])
+  @@index([visitId])
+}

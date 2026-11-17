@@ -1,6 +1,6 @@
 import { Terminal } from "@/components/fx/Terminal";
 import { HopHeading } from "@/components/layout/Hop";
-import { profile } from "@/data/profile";
+import type { Profile } from "@/lib/content-types";
 import { AboutFx } from "./AboutFx";
 
 /** Sidik jari "sertifikat" palsu tapi deterministik, diturunin dari nama (dekorasi). */
@@ -19,7 +19,7 @@ function fingerprint(s: string) {
  * lalu "sertifikat" berisi fakta, lalu terminal buat nanya langsung.
  * Gembok 3D ada di kiri, jadi isi ditaruh di kanan.
  */
-export function About() {
+export function About({ profile }: { profile: Profile }) {
   const [lead, ...rest] = profile.bio;
   return (
     <section
@@ -83,9 +83,13 @@ export function About() {
             <p className="line-fg text-dim border-t px-4 py-2 text-micro">Issuer: self-signed. Verified by shipped work, see next hop.</p>
           </figure>
 
-          <div className="mt-12 max-w-[62ch]">
+          <div data-inline-terminal className="mt-12 max-w-[62ch]">
             <p className="panel text-dim mb-3 inline-block text-small">Socket is open. Ask directly:</p>
             <Terminal />
+            <p className="panel text-dim mt-2 inline-block text-micro">
+              Answers come from an AI that only knows what&apos;s on this site. Questions are saved (without your IP) so I
+              can read them.
+            </p>
           </div>
         </div>
       </div>

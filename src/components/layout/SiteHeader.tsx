@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useSyncExternalStore } from "react";
-import { nav, profile } from "@/data/profile";
+import { useContent } from "@/components/ContentProvider";
+import { nav } from "@/data/profile";
 import { calm, initCalm, setCalm, subscribeCalm } from "@/lib/calm";
 import { CHAPTERS, stage, subscribeStage } from "@/lib/stage";
 
@@ -11,6 +12,7 @@ import { CHAPTERS, stage, subscribeStage } from "@/lib/stage";
  * Stripnya transparan; cuma address bar + menu yang punya latar, biar scene 3D tetep keliatan.
  */
 export function SiteHeader() {
+  const { profile } = useContent();
   const chapter = useSyncExternalStore(
     subscribeStage,
     () => stage.chapter,

@@ -1,20 +1,15 @@
+import type { Project } from "@/lib/content-types";
+
+export type { Project };
+
 /**
- * DATA PROJECT — edit di sini aja, halamannya otomatis ngikut.
- * Nomor (01, 02, ...) diambil dari urutan array, dan kubus 3D ikut nyusun angka itu.
+ * DATA PROJECT DEFAULT — konten aslinya sekarang di database (edit lewat /admin).
+ * Dipake buat isi awal database, cadangan kalau DB mati, dan build preview.
+ * Nomor (01, 02, ...) diambil dari urutan, dan kubus 3D ikut nyusun angka itu.
  *
  * thumbnail: taruh gambar di /public/projects/ lalu isi path-nya,
  * misal "/projects/alpha.jpg". Kalau dikosongin, dipake gambar generatif.
  */
-export type Project = {
-  slug: string;
-  title: string;
-  year: string;
-  role: string;
-  description: string;
-  stack: string[];
-  links: { live?: string; repo?: string };
-  thumbnail?: string;
-};
 
 export const projects: Project[] = [
   {

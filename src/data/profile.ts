@@ -1,8 +1,11 @@
+import type { Profile, SkillGroup } from "@/lib/content-types";
+
 /**
- * DATA PROFIL — nama, bio, skill, kontak. Semua masih placeholder, ganti di sini.
- * Teks di web pake bahasa Inggris.
+ * DATA PROFIL DEFAULT — sekarang konten aslinya ada di database (edit lewat /admin).
+ * File ini dipake buat: isi awal database (npm run db:seed), cadangan kalau database
+ * nggak bisa diakses, dan build preview satu-file. Teks di web pake bahasa Inggris.
  */
-export const profile = {
+export const profile: Profile = {
   name: "Your Name",
   /** Domain kamu — dipake di URL bar, boot screen (DNS lookup), dan header response */
   domain: "yourname.dev",
@@ -30,13 +33,14 @@ export const profile = {
 };
 
 /** Grup skill = "tabel" di bab Query. Filter WHERE di sana diambil dari nama grup. */
-export const skills = [
+export const skills: SkillGroup[] = [
   { group: "Frontend", items: ["TypeScript", "React", "Next.js", "Tailwind CSS"] },
   { group: "Backend", items: ["Node.js", "REST API", "Auth", "WebSocket"] },
   { group: "Database", items: ["PostgreSQL", "MySQL", "Redis", "Prisma"] },
   { group: "Tools", items: ["Git", "Docker", "CI/CD", "Linux"] },
 ];
 
+/** Menu = anchor ke tiap hop. Struktural, bukan konten, jadi nggak masuk database. */
 export const nav = [
   { label: "About", href: "#about" },
   { label: "Projects", href: "#projects" },

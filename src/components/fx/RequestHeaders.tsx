@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { profile } from "@/data/profile";
+import { useContent } from "@/components/ContentProvider";
 import { Rtt } from "./NetStatus";
 
 type Row = [string, string];
@@ -32,8 +32,8 @@ function browser(ua: string) {
   return `${name} / ${os}`;
 }
 
-const BASE: Row[] = [
-  ["Host", profile.domain],
+const base = (domain: string): Row[] => [
+  ["Host", domain],
   ["User-Agent", "…"],
   ["Accept", "projects/*, skills/*"],
   ["Viewport", "…"],
@@ -46,7 +46,8 @@ const BASE: Row[] = [
  * Server render nilai "…", diisi beneran setelah mount biar nggak beda sama HTML server.
  */
 export function RequestHeaders() {
-  const [rows, setRows] = useState<Row[]>(BASE);
+  const { profile } = useContent();
+  const [rows, setRows] = useState<Row[]>(() => base(profile.domain));
 
   useEffect(() => {
     const fmt = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
@@ -62,7 +63,7 @@ export function RequestHeaders() {
     tick();
     const id = window.setInterval(tick, 1000);
     return () => window.clearInterval(id);
-  }, []);
+  }, [profile.domain]);
 
   return (
     <dl className="space-y-0.5">

@@ -1,13 +1,18 @@
 import type { Metadata } from "next";
+import { getContent } from "@/lib/content";
 import "@fontsource-variable/archivo/wdth.css";
 import "@fontsource/space-mono/400.css";
 import "@fontsource/space-mono/700.css";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "Your Name — Fullstack Developer",
-  description: "Fullstack developer portfolio. You are the request: follow it through the whole stack.",
-};
+/** Judul & deskripsi dari konten di database (pake cache yang sama dengan halaman). */
+export async function generateMetadata(): Promise<Metadata> {
+  const { profile } = await getContent();
+  return {
+    title: { default: `${profile.name} — ${profile.role}`, template: `%s · ${profile.name}` },
+    description: `${profile.role} portfolio. ${profile.tagline}`,
+  };
+}
 
 /**
  * Jalan sebelum paint: kalau boot screen udah pernah tampil di tab ini, sembunyiin dari awal

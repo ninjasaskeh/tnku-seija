@@ -59,7 +59,7 @@ export function TraceHud() {
       {/* kanan bawah: waterfall */}
       {/* disembunyiin di Routes (nabrak indeks project) & calm mode */}
       <div
-        className={`cut pointer-events-none fixed bottom-4 right-4 z-30 hidden w-64 text-micro transition-opacity md:block in-[.calm]:hidden ${chapter === "projects" ? "opacity-0" : ""}`}
+        className={`cut pointer-events-none fixed bottom-24 right-6 z-30 hidden w-64 text-micro transition-opacity md:block in-[.calm]:hidden ${chapter === "projects" ? "opacity-0" : ""}`}
       >
         <p className="flex justify-between">
           <span>{CHAPTERS[chapter ?? "hero"].layer}</span>
