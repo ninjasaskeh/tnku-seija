@@ -2,13 +2,15 @@
 
 import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
-import { auth, requireAdmin } from "@/lib/auth";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
+import { requireAdmin } from "@/lib/session";
 import { CONTENT_TAG } from "@/lib/content";
 import { db } from "@/lib/db";
 import { deleteImage, uploadImage } from "@/lib/storage";
 
 /**
- * Server Actions admin. SEMUA mulai dengan requireAdmin() (login sendiri lewat Neon Auth / Google),
+ * Server Actions admin. SEMUA mulai dengan requireAdmin() (login sendiri lewat Better Auth / Google),
  * dan semua input dari form divalidasi di sini (form di browser bisa dimanipulasi).
  */
 export type ActionState = { ok?: string; error?: string } | null;
@@ -48,9 +50,8 @@ function pairs(v: string): [string, string][] {
 // ---------- sesi ----------
 
 export async function logout() {
-  await auth()
-    .signOut()
-    .catch(() => null);
+  // nextCookies() di config auth yang ngehapus cookie sesi dari dalam Server Action
+  await auth.api.signOut({ headers: await headers() }).catch(() => null);
   redirect("/admin/login");
 }
 

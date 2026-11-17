@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { ListSkeleton } from "@/components/admin/skeletons";
 import { btn, EmptyState, fmtNum, PageHeader, Panel, timeAgo } from "@/components/admin/ui";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin } from "@/lib/session";
 import { listConversations } from "@/lib/stats";
 
 export default function ConversationsPage({ searchParams }: PageProps<"/admin/conversations">) {

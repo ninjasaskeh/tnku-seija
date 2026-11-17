@@ -4,7 +4,7 @@ import { ActionForm } from "@/components/admin/ActionForm";
 import { SkillsEditor } from "@/components/admin/SkillsEditor";
 import { FormSkeleton } from "@/components/admin/skeletons";
 import { PageHeader, Panel } from "@/components/admin/ui";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin } from "@/lib/session";
 import { db } from "@/lib/db";
 
 export default function SkillsPage() {

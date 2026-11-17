@@ -3,7 +3,7 @@ import { saveProfile } from "@/app/admin/actions";
 import { ActionForm, Field } from "@/components/admin/ActionForm";
 import { FormSkeleton } from "@/components/admin/skeletons";
 import { PageHeader, Panel } from "@/components/admin/ui";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin } from "@/lib/session";
 import type { Fact, Social } from "@/lib/content-types";
 import { db } from "@/lib/db";
 

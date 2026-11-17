@@ -5,7 +5,7 @@ import { deleteChatSession } from "@/app/admin/actions";
 import { ActionForm } from "@/components/admin/ActionForm";
 import { TranscriptSkeleton } from "@/components/admin/skeletons";
 import { Badge, cx, fmtUsd, PageHeader, Panel } from "@/components/admin/ui";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin } from "@/lib/session";
 import { priceFor } from "@/lib/chat";
 import { db } from "@/lib/db";
 

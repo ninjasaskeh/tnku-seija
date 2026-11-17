@@ -3,7 +3,7 @@ import { logout } from "@/app/admin/actions";
 import { Sidebar } from "@/components/admin/Sidebar";
 import { UserSkeleton } from "@/components/admin/skeletons";
 import { btn, StatusDot } from "@/components/admin/ui";
-import { authConfigured, requireAdmin } from "@/lib/auth";
+import { authConfigured, requireAdmin } from "@/lib/session";
 import { CHAT_MODEL } from "@/lib/chat";
 import { storageConfigured } from "@/lib/storage";
 

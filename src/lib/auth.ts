@@ -1,65 +1,49 @@
 import "server-only";
-import { createNeonAuth } from "@neon/auth/next/server";
-import { redirect } from "next/navigation";
-import { connection } from "next/server";
+import { betterAuth } from "better-auth/minimal";
+import { prismaAdapter } from "better-auth/adapters/prisma";
+import { APIError } from "better-auth/api";
+import { nextCookies } from "better-auth/next-js";
+import { db } from "./db";
 
 /**
- * Login admin pake Neon Auth (Better Auth yang di-host Neon), lewat Google.
- * Data user & sesi disimpen Neon di skema `neon_auth` database kamu.
+ * Konfigurasi Better Auth (sesuai docs: file auth.ts di lib/, export bernama `auth`).
+ * - Data user/sesi di Postgres lewat Prisma (model User/Session/Account/Verification).
+ * - Login cuma lewat Google. Email/password nggak dinyalain.
+ * - Cuma email di ADMIN_EMAILS yang boleh bikin akun → pendaftaran orang lain ditolak di sini,
+ *   bukan cuma disembunyiin di UI.
  *
- * PENTING: Neon Auth nggak punya setelan "tutup pendaftaran", jadi siapa pun bisa bikin akun.
- * Yang boleh masuk /admin cuma email di ADMIN_EMAILS (dan emailnya udah terverifikasi).
- * Tiap Server Action admin WAJIB manggil requireAdmin() sendiri: action itu endpoint POST publik.
+ * Env: BETTER_AUTH_SECRET, BETTER_AUTH_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, ADMIN_EMAILS.
  */
-let instance: ReturnType<typeof createNeonAuth> | null = null;
-
-export function auth() {
-  if (!instance) {
-    const baseUrl = process.env.NEON_AUTH_BASE_URL;
-    const secret = process.env.NEON_AUTH_COOKIE_SECRET;
-    if (!baseUrl || !secret || secret.length < 32)
-      throw new Error("NEON_AUTH_BASE_URL / NEON_AUTH_COOKIE_SECRET (32+ karakter) belum diisi (lihat .env.example)");
-    instance = createNeonAuth({ baseUrl, cookies: { secret, sameSite: "lax" } });
-  }
-  return instance;
-}
-
-const adminEmails = () =>
+export const adminEmails = () =>
   (process.env.ADMIN_EMAILS ?? "")
     .split(",")
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
 
-export type Viewer = { email: string; name: string; image: string | null; isAdmin: boolean } | null;
-
-/** Siapa yang lagi login (atau null), plus boleh masuk admin atau nggak. */
-export async function getViewer(): Promise<Viewer> {
-  await connection(); // sesi dicek per request, bukan waktu prerender
-  if (!authConfigured().ready) return null;
-  const { data } = await auth().getSession();
-  const user = data?.user;
-  if (!user?.email) return null;
-  const email = user.email.toLowerCase();
-  return {
-    email,
-    name: user.name || email,
-    image: user.image ?? null,
-    isAdmin: Boolean(user.emailVerified) && adminEmails().includes(email),
-  };
-}
-
-/** Buat halaman & action admin: lempar ke /admin/login kalau belum login / bukan admin. */
-export async function requireAdmin() {
-  const viewer = await getViewer();
-  if (!viewer?.isAdmin) redirect("/admin/login");
-  return viewer;
-}
-
-/** Status konfigurasi, buat ngasih tau di halaman login kalau env belum lengkap. */
-export function authConfigured() {
-  const missing: string[] = [];
-  if (!process.env.NEON_AUTH_BASE_URL) missing.push("NEON_AUTH_BASE_URL");
-  if ((process.env.NEON_AUTH_COOKIE_SECRET ?? "").length < 32) missing.push("NEON_AUTH_COOKIE_SECRET (32+ chars)");
-  if (!adminEmails().length) missing.push("ADMIN_EMAILS");
-  return { ready: missing.length === 0, missing };
-}
+export const auth = betterAuth({
+  baseURL: process.env.BETTER_AUTH_URL,
+  database: prismaAdapter(db(), { provider: "postgresql" }),
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      prompt: "select_account",
+    },
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        // akun baru cuma boleh buat email admin
+        before: async (user) => {
+          if (!adminEmails().includes(user.email.toLowerCase())) {
+            // `code` → Better Auth redirect ke errorCallbackURL?error=not_admin (lihat halaman login)
+            throw new APIError("FORBIDDEN", { code: "not_admin", message: "This Google account is not allowed here." });
+          }
+          return { data: user };
+        },
+      },
+    },
+  },
+  // harus paling akhir: biar Server Action (mis. sign out) bisa nyetel cookie
+  plugins: [nextCookies()],
+});

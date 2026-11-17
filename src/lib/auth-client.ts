@@ -1,6 +1,6 @@
 "use client";
 
-import { createAuthClient } from "@neon/auth/next";
+import { createAuthClient } from "better-auth/react";
 
-/** Klien Neon Auth buat komponen client (ngomong ke /api/auth/*). */
+/** Klien Better Auth buat komponen client (ngomong ke /api/auth/*, domain yang sama). */
 export const authClient = createAuthClient();

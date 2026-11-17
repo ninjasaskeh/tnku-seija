@@ -6,7 +6,7 @@ import { ActionForm, Field } from "@/components/admin/ActionForm";
 import { FormSkeleton } from "@/components/admin/skeletons";
 import { ThumbnailInput } from "@/components/admin/ThumbnailInput";
 import { Badge, PageHeader, Panel } from "@/components/admin/ui";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin } from "@/lib/session";
 import { db } from "@/lib/db";
 import { storageConfigured } from "@/lib/storage";
 

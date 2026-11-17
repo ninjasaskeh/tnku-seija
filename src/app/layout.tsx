@@ -23,8 +23,10 @@ const BOOT_SEEN = `try{if(sessionStorage.getItem("portfolio:booted")==="1")docum
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    // suppressHydrationWarning: class `boot-seen` dipasang script sebelum React hydrate
-    <html lang="en" className="antialiased" suppressHydrationWarning>
+    // suppressHydrationWarning: class `boot-seen` dipasang script sebelum React hydrate.
+    // data-scroll-behavior: globals.css pake scroll-behavior smooth; atribut ini bikin Next
+    // matiin smooth scroll sementara waktu pindah halaman (mis. ke /admin).
+    <html lang="en" className="antialiased" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: BOOT_SEEN }} />
       </head>

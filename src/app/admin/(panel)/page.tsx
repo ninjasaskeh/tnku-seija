@@ -4,7 +4,7 @@ import { BarList, ColumnChart } from "@/components/admin/charts";
 import { DashboardSkeleton } from "@/components/admin/skeletons";
 import { StatTile } from "@/components/admin/StatTile";
 import { cx, EmptyState, fmtNum, fmtUsd, PageHeader, Panel, timeAgo } from "@/components/admin/ui";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin } from "@/lib/session";
 import { parseRange, RANGES, dashboardStats } from "@/lib/stats";
 
 export default function OverviewPage({ searchParams }: PageProps<"/admin">) {

@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { ProjectThumb } from "@/components/ProjectThumb";
 import { GridSkeleton } from "@/components/admin/skeletons";
 import { Badge, btn, PageHeader } from "@/components/admin/ui";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin } from "@/lib/session";
 import { db } from "@/lib/db";
 
 export default function ProjectsPage() {

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 
-/** Tombol login Google (Neon Auth). Balik lagi ke /admin setelah sukses. */
+/** Tombol login Google (Better Auth). Balik ke /admin kalau sukses, ke /admin/login?error=… kalau gagal. */
 export function GoogleSignIn() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -13,7 +13,9 @@ export function GoogleSignIn() {
     setError(null);
     const { error } = await authClient.signIn.social({
       provider: "google",
-      callbackURL: `${window.location.origin}/admin`,
+      // path relatif, diselesaiin Better Auth dari BETTER_AUTH_URL (lokal & production sama)
+      callbackURL: "/admin",
+      errorCallbackURL: "/admin/login",
     });
     // kalau sukses browser langsung pindah ke Google; sampai sini berarti gagal
     if (error) {
