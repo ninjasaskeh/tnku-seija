@@ -2,9 +2,10 @@ import { Effect } from "postprocessing";
 import { Color, Uniform } from "three";
 
 /**
- * Efek post-processing custom: dither 1-bit (Bayer 4x4) + scanline + glitch baris.
+ * Efek post-processing custom: dither 1-bit (Bayer 4x4) + scanline + glitch "packet loss".
  * - uPixel : ukuran satu "pixel" dither (device px)
- * - uGlitch: 0..1, dinaikin kecepatan mouse → baris-baris geser horizontal
+ * - uGlitch: 0..1, dinaikin kecepatan mouse / pindah bab → baris geser horizontal
+ *            + blok-blok kotak kebalik warnanya (kayak paket yang ilang di jalan)
  * - uScan  : seberapa kuat scanline (0 = mati)
  * - uLight / uDark: dua warna 1-bit-nya (diisi dari warna bab yang aktif)
  */
@@ -43,6 +44,11 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   lum = pow(clamp(lum, 0.0, 1.0), 0.8);
 
   float on = step(bayer4(cell) + 0.03, lum);
+
+  // packet loss: blok 12x12 cell acak dibalik
+  vec2 block = floor(cell / 12.0);
+  float drop = hash(block.x * 3.17 + block.y * 57.31 + floor(time * 14.0) * 11.7);
+  on = mix(on, 1.0 - on, step(1.0 - uGlitch * uGlitch * 0.06, drop));
   // scanline: baris genap ditarik sedikit ke arah warna latar
   float line = uScan * step(1.0, mod(cell.y, 2.0));
 
@@ -56,7 +62,7 @@ export class DitherEffect extends Effect {
       uniforms: new Map<string, Uniform>([
         ["uPixel", new Uniform(3)],
         ["uGlitch", new Uniform(0)],
-        ["uScan", new Uniform(0.38)],
+        ["uScan", new Uniform(0.22)],
         ["uLight", new Uniform(new Color("#c6ff00"))],
         ["uDark", new Uniform(new Color("#000000"))],
       ]),

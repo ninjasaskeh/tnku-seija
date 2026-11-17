@@ -4,6 +4,8 @@
  */
 export const profile = {
   name: "Your Name",
+  /** Domain kamu — dipake di URL bar, boot screen (DNS lookup), dan header response */
+  domain: "yourname.dev",
   role: "Fullstack Developer",
   location: "Indonesia",
   tagline: "I build web apps end to end: the schema, the API, and the interface people actually touch.",
@@ -27,7 +29,7 @@ export const profile = {
   ],
 };
 
-/** Urutan grup = urutan lapisan "stack" di hero (3 grup pertama dipake buat label lapisan). */
+/** Grup skill = "tabel" di bab Query. Filter WHERE di sana diambil dari nama grup. */
 export const skills = [
   { group: "Frontend", items: ["TypeScript", "React", "Next.js", "Tailwind CSS"] },
   { group: "Backend", items: ["Node.js", "REST API", "Auth", "WebSocket"] },

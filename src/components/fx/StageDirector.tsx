@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useBooted } from "@/lib/boot";
 import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { type ChapterId, setChapter, stage } from "@/lib/stage";
@@ -10,6 +11,12 @@ import { type ChapterId, setChapter, stage } from "@/lib/stage";
  */
 export function StageDirector() {
   const booted = useBooted();
+
+  // Bentuk & warna hero dipasang langsung pas mount, jadi kubus udah nyusun di balik boot screen.
+  // Pas boot selesai, pengunjung langsung liat paketnya jadi (bukan gumpalan yang lagi berubah).
+  useEffect(() => {
+    if (!stage.chapter && window.scrollY < window.innerHeight * 0.5) setChapter("hero");
+  }, []);
 
   useGSAP(
     () => {

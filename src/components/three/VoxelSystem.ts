@@ -2,13 +2,19 @@ import { type Camera, type InstancedMesh, Matrix4, Object3D, Raycaster, Vector2,
 
 /**
  * Sistem kubus: N kubus yang sama, pindah-pindah formasi.
- * Semua dihitung di CPU tiap frame (N ≤ 4096 masih enteng):
- * posisi = lerp(asal → tujuan) + lengkungan "ledakan" di tengah jalan + dorongan dari mouse.
+ * Semua dihitung di CPU tiap frame (N ≤ 4096 masih enteng).
+ *
+ * Konsep ROUND TRIP:
+ * - Pindah formasi = data "di-stream": kubus disedot ke satu jalur sempit (kayak lewat kabel),
+ *   jatuh ke bawah sambil molor, lalu nyusun bentuk baru. Yang paling atas berangkat duluan.
+ * - Sebagian kecil kubus (STREAM) nggak pernah ikut bentuk: jadi paket data yang terus
+ *   ngalir turun di dua jalur di belakang objek. Pas pindah bab, alirannya ngebut.
  */
 
 const RADIUS = 14; // setengah bentang tiap bentuk setelah dinormalisasi
-const DUR = 1.15; // detik per kubus
-const MAX_DELAY = 0.55;
+const DUR = 1.25; // detik per kubus
+const MAX_DELAY = 0.6;
+const STREAM = 0.03; // porsi kubus yang jadi aliran paket
 
 type Shape = { pos: Float32Array; scale: Float32Array };
 
@@ -23,7 +29,7 @@ function mulberry32(seed: number) {
 }
 
 /* ---------- Generator bentuk ----------
-   Tiap fungsi balikin titik-titik grid [x,y,z,...] dan nyesuaiin ukurannya ke jumlah kubus (n),
+   Tiap fungsi balikin titik-titik grid [x,y,z,...] dan nyesuaiin resolusinya ke jumlah kubus (n),
    biar hampir semua kubus kepake buat bentuknya (desktop 4096, mobile 1400). */
 
 function cube(n: number): number[] {
@@ -33,36 +39,90 @@ function cube(n: number): number[] {
   return p;
 }
 
-/** Tiga lempeng bertumpuk = "stack": interface / API / data. */
-function stack(n: number): number[] {
-  const side = Math.max(6, Math.floor(Math.sqrt((n * 0.9) / 9)));
-  const gap = Math.round(side * 0.45);
-  const p: number[] = [];
-  for (let layer = 0; layer < 3; layer++)
-    for (let x = 0; x < side; x++)
-      for (let z = 0; z < side; z++) for (let y = 0; y < 3; y++) p.push(x, layer * gap + y, z);
-  return p;
-}
-
-/** Smiley acid: cakram cembung dengan lubang mata + mulut. Radius dikecilin sampai muat di n kubus. */
-function face(n: number): number[] {
-  for (let R = 12.5; R >= 5; R -= 0.5) {
-    const p: number[] = [];
-    const lim = Math.floor(R);
-    for (let x = -lim; x <= lim; x++) {
-      for (let y = -lim; y <= lim; y++) {
-        const d = Math.hypot(x, y);
-        if (d > R) continue;
-        const eye = ((Math.abs(x) - 0.36 * R) / (0.14 * R)) ** 2 + ((y - 0.28 * R) / (0.23 * R)) ** 2 < 1;
-        const mouth = y < -0.12 * R && Math.abs(Math.hypot(x, y - 0.08 * R) - 0.58 * R) < Math.max(0.8, 0.09 * R);
-        if (eye || mouth) continue;
-        const depth = Math.max(2, Math.round(R * 0.25)) + Math.floor(R * 0.6 * Math.sqrt(1 - (d / R) ** 2));
-        for (let z = 0; z < depth; z++) p.push(x, y, z - depth / 2);
-      }
-    }
-    if (p.length / 3 <= n * 0.95) return p;
+/** Ulangi generator dengan resolusi makin kecil sampai jumlah titiknya muat di n. */
+function fit(n: number, from: number, to: number, step: number, gen: (r: number) => number[]): number[] {
+  for (let r = from; r >= to; r -= step) {
+    const p = gen(r);
+    if (p.length / 3 <= n) return p;
   }
   return cube(n);
+}
+
+/** Jarak titik ke ruas garis a→b (2D). */
+function segDist(px: number, py: number, ax: number, ay: number, bx: number, by: number) {
+  const dx = bx - ax;
+  const dy = by - ay;
+  const t = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy)));
+  return Math.hypot(px - (ax + dx * t), py - (ay + dy * t));
+}
+
+/** Amplop = paket data: lempeng tipis, pinggir + lipatan "V" timbul. */
+function packet(n: number): number[] {
+  return fit(n, 56, 14, 2, (W) => {
+    const H = Math.round(W * 0.62);
+    const p: number[] = [];
+    const lw = Math.max(0.9, W * 0.035);
+    for (let x = 0; x < W; x++) {
+      for (let y = 0; y < H; y++) {
+        const edge = x < 1 || y < 1 || x > W - 2 || y > H - 2;
+        const flap =
+          segDist(x, y, 0, H - 1, (W - 1) / 2, H * 0.38) < lw || segDist(x, y, W - 1, H - 1, (W - 1) / 2, H * 0.38) < lw;
+        const depth = edge || flap ? 4 : 2;
+        for (let z = 0; z < depth; z++) p.push(x, y, z);
+      }
+    }
+    return p;
+  });
+}
+
+/** Gembok TLS: badan dengan lubang kunci + busur (shackle) di atas. */
+function lock(n: number): number[] {
+  return fit(n, 16, 5, 0.5, (R) => {
+    const p: number[] = [];
+    const lim = Math.ceil(R * 1.4);
+    const bodyD = Math.max(3, Math.round(R * 0.5));
+    const shD = Math.max(2, Math.round(R * 0.28));
+    for (let x = -lim; x <= lim; x++) {
+      for (let y = Math.floor(-1.1 * R); y <= Math.ceil(1.3 * R); y++) {
+        const body = Math.abs(x) <= R && y <= 0.1 * R && y >= -1.1 * R;
+        const hole =
+          Math.hypot(x, y + 0.38 * R) < 0.2 * R || (Math.abs(x) < Math.max(0.6, 0.08 * R) && y < -0.38 * R && y > -0.8 * R);
+        // busur: dua kaki lurus + setengah lingkaran
+        const ax = Math.abs(x);
+        const leg = ax >= 0.48 * R && ax <= 0.76 * R && y > 0.1 * R && y <= 0.5 * R;
+        const d = Math.hypot(x, y - 0.5 * R);
+        const arch = y > 0.5 * R && d >= 0.48 * R && d <= 0.76 * R;
+        if (body && !hole) for (let z = 0; z < bodyD; z++) p.push(x, y, z - bodyD / 2);
+        else if (leg || arch) for (let z = 0; z < shD; z++) p.push(x, y, z - shD / 2);
+      }
+    }
+    return p;
+  });
+}
+
+/** Database: tiga cakram bertumpuk, cuma kulitnya (dinding + tutup atas) biar resolusinya tinggi. */
+function db(n: number): number[] {
+  return fit(n, 22, 6, 0.5, (r) => {
+    const h = Math.max(2, Math.round(r * 0.28));
+    const gap = Math.max(2, Math.round(r * 0.3));
+    const lim = Math.ceil(r);
+    const p: number[] = [];
+    for (let disc = 0; disc < 3; disc++) {
+      const y0 = disc * (h + gap);
+      for (let x = -lim; x <= lim; x++) {
+        for (let z = -lim; z <= lim; z++) {
+          const d = Math.hypot(x, z);
+          if (d > r) continue;
+          const wall = d > r - 1.3;
+          for (let y = 0; y < h; y++) {
+            const cap = y === h - 1 || y === 0;
+            if (wall || cap) p.push(x, y0 + y, z);
+          }
+        }
+      }
+    }
+    return p;
+  });
 }
 
 /** Teks/simbol apa pun → voxel: digambar ke canvas 2D kecil, tiap pixel yang keisi jadi kolom kubus. */
@@ -83,25 +143,27 @@ function glyph(n: number, text: string, font: string, w: number, h: number): num
   const cells = flat.length / 2;
   if (!cells) return cube(n);
   // tebel ekstrusi dipilih biar jumlah kubusnya mendekati n
-  const depth = Math.min(9, Math.max(1, Math.floor((n * 0.93) / cells)));
+  const depth = Math.min(9, Math.max(1, Math.floor((n * 0.97) / cells)));
   const p: number[] = [];
   for (let i = 0; i < flat.length; i += 2) for (let z = 0; z < depth; z++) p.push(flat[i], flat[i + 1], z);
   return p;
 }
 
+const FONT = '"Archivo Variable", "Arial Black", sans-serif';
+
 function points(id: string, n: number): number[] {
-  if (id === "stack") return stack(n);
-  if (id === "face") return face(n);
-  if (id === "code") return glyph(n, "</>", '900 30px "Archivo Variable", "Arial Black", sans-serif', 64, 34);
-  if (id === "at") return glyph(n, "@", '900 46px "Archivo Variable", "Arial Black", sans-serif', 50, 54);
-  if (id.startsWith("num")) {
-    const label = String(Number(id.slice(3)) + 1).padStart(2, "0");
-    return glyph(n, label, '900 30px "Archivo Variable", "Arial Black", sans-serif', 50, 30);
+  if (id === "packet") return packet(n);
+  if (id === "lock") return lock(n);
+  if (id === "db") return db(n);
+  if (id === "ok") return glyph(n, "200", `900 30px ${FONT}`, 66, 32);
+  if (id.startsWith("route")) {
+    const label = String(Number(id.slice(5)) + 1).padStart(2, "0");
+    return glyph(n, `/${label}`, `900 30px ${FONT}`, 70, 32);
   }
   return cube(n);
 }
 
-/** Tengahin, samain ukuran, lalu petain ke N kubus. Sisa kubus: sedikit jadi "debu", sisanya disembunyiin. */
+/** Tengahin, samain ukuran, lalu petain ke kubus bentuk. Kubus kelebihan disembunyiin (skala 0). */
 function build(id: string, count: number): Shape {
   const pts = points(id, count);
   const m = pts.length / 3;
@@ -123,27 +185,14 @@ function build(id: string, count: number): Shape {
     [order[i], order[j]] = [order[j], order[i]];
   }
 
-  const dust = Math.round(count * 0.06);
   const pos = new Float32Array(count * 3);
   const scale = new Float32Array(count);
   for (let i = 0; i < count; i++) {
-    if (i < m || i >= m + dust) {
-      // bagian dari bentuk; kubus kelebihan ngumpet (skala 0) di dalem bentuknya
-      const k = order[i % m] * 3;
-      pos[i * 3] = (pts[k] - (min[0] + max[0]) / 2) * f;
-      pos[i * 3 + 1] = (pts[k + 1] - (min[1] + max[1]) / 2) * f;
-      pos[i * 3 + 2] = (pts[k + 2] - (min[2] + max[2]) / 2) * f;
-      scale[i] = i < m ? f * 0.8 : 0; // 0.8 = sisain celah antar kubus
-    } else {
-      const u = rand() * 2 - 1;
-      const a = rand() * Math.PI * 2;
-      const r = RADIUS * (1.35 + rand() * 0.9);
-      const s = Math.sqrt(1 - u * u);
-      pos[i * 3] = Math.cos(a) * s * r;
-      pos[i * 3 + 1] = u * r * 0.75;
-      pos[i * 3 + 2] = Math.sin(a) * s * r;
-      scale[i] = 0.3 + rand() * 0.4;
-    }
+    const k = order[i % m] * 3;
+    pos[i * 3] = (pts[k] - (min[0] + max[0]) / 2) * f;
+    pos[i * 3 + 1] = (pts[k + 1] - (min[1] + max[1]) / 2) * f;
+    pos[i * 3 + 2] = (pts[k + 2] - (min[2] + max[2]) / 2) * f;
+    scale[i] = i < m ? f * 0.8 : 0; // 0.8 = sisain celah antar kubus
   }
   return { pos, scale };
 }
@@ -151,6 +200,8 @@ function build(id: string, count: number): Shape {
 export class VoxelSystem {
   shapeId = "";
   private shapes = new Map<string, Shape>();
+  /** kubus [0, body) = bentuk, [body, count) = aliran paket */
+  private body: number;
   private cur: Float32Array;
   private from: Float32Array;
   private to: Float32Array;
@@ -158,9 +209,12 @@ export class VoxelSystem {
   private fromS: Float32Array;
   private toS: Float32Array;
   private delay: Float32Array;
-  private dir: Float32Array;
+  private jitter: Float32Array;
   private rot: Float32Array;
+  /** aliran: x, z, fase, kecepatan */
+  private lane: Float32Array;
   private clock = 99;
+  private flow = 0;
 
   private dummy = new Object3D();
   private inv = new Matrix4();
@@ -174,6 +228,7 @@ export class VoxelSystem {
     private count: number,
   ) {
     const n = count;
+    this.body = n - Math.round(n * STREAM);
     this.cur = new Float32Array(n * 3);
     this.from = new Float32Array(n * 3);
     this.to = new Float32Array(n * 3);
@@ -181,20 +236,21 @@ export class VoxelSystem {
     this.fromS = new Float32Array(n);
     this.toS = new Float32Array(n);
     this.delay = new Float32Array(n);
-    this.dir = new Float32Array(n * 3);
+    this.jitter = new Float32Array(n);
     this.rot = new Float32Array(n * 2);
+    this.lane = new Float32Array(n * 4);
 
     const rand = mulberry32(7);
     for (let i = 0; i < n; i++) {
-      this.delay[i] = rand() * MAX_DELAY;
-      const u = rand() * 2 - 1;
-      const a = rand() * Math.PI * 2;
-      const s = Math.sqrt(1 - u * u);
-      this.dir[i * 3] = Math.cos(a) * s;
-      this.dir[i * 3 + 1] = u;
-      this.dir[i * 3 + 2] = Math.sin(a) * s;
-      this.rot[i * 2] = (rand() - 0.5) * Math.PI * 4;
-      this.rot[i * 2 + 1] = (rand() - 0.5) * Math.PI * 4;
+      this.jitter[i] = rand();
+      this.rot[i * 2] = (rand() - 0.5) * Math.PI;
+      this.rot[i * 2 + 1] = (rand() - 0.5) * Math.PI;
+      // dua jalur kabel di belakang objek, kiri & kanan; tiap paket sedikit geser dari jalurnya
+      const side = rand() < 0.5 ? -1 : 1;
+      this.lane[i * 4] = side * RADIUS * (1.38 + rand() * 0.1) + (rand() - 0.5) * 0.9;
+      this.lane[i * 4 + 1] = -RADIUS * 0.6 + (rand() - 0.5) * 1.2;
+      this.lane[i * 4 + 2] = rand();
+      this.lane[i * 4 + 3] = (0.025 + rand() * 0.035) * (side < 0 ? 1 : 1.3);
     }
 
     const start = this.shape("cube");
@@ -210,7 +266,7 @@ export class VoxelSystem {
   private shape(id: string) {
     let s = this.shapes.get(id);
     if (!s) {
-      s = build(id, this.count);
+      s = build(id, this.body);
       this.shapes.set(id, s);
     }
     return s;
@@ -218,10 +274,24 @@ export class VoxelSystem {
 
   setShape(id: string) {
     const target = this.shape(id);
-    this.from.set(this.cur);
-    this.fromS.set(this.curS);
+    this.from.set(this.cur.subarray(0, this.body * 3));
+    this.fromS.set(this.curS.subarray(0, this.body));
     this.to.set(target.pos);
     this.toS.set(target.scale);
+
+    // yang paling atas berangkat duluan → kesannya data ngalir ke bawah
+    let lo = Infinity;
+    let hi = -Infinity;
+    for (let i = 0; i < this.body; i++) {
+      const y = this.from[i * 3 + 1];
+      if (y < lo) lo = y;
+      if (y > hi) hi = y;
+    }
+    const range = Math.max(0.001, hi - lo);
+    for (let i = 0; i < this.body; i++) {
+      const top = (hi - this.from[i * 3 + 1]) / range;
+      this.delay[i] = top * MAX_DELAY * 0.8 + this.jitter[i] * MAX_DELAY * 0.2;
+    }
     this.clock = 0;
     this.shapeId = id;
   }
@@ -229,12 +299,16 @@ export class VoxelSystem {
   /**
    * @param px,py posisi mouse -1..1 (y ke bawah positif), atau null kalau nggak ada mouse
    * @param speed kecepatan mouse 0..1 → radius & kekuatan dorongan
+   * @param rush 0..1 → aliran paket ngebut (dipake pas pindah bab)
+   * @param stream false → aliran paket disembunyiin (calm mode)
    */
-  update(dt: number, camera: Camera, px: number | null, py: number, speed: number) {
-    const { mesh, count, cur, from, to, curS, fromS, toS, delay, dir, rot, dummy, o, d } = this;
+  update(dt: number, camera: Camera, px: number | null, py: number, speed: number, rush: number, stream = true) {
+    const { mesh, count, body, cur, from, to, curS, fromS, toS, delay, rot, lane, dummy, o, d } = this;
     const arr = mesh.instanceMatrix.array as Float32Array;
     this.clock += dt;
+    this.flow += dt * (1 + rush * 3);
     const clock = this.clock;
+    const flow = this.flow;
     const moving = clock < DUR + MAX_DELAY;
 
     // sinar mouse → ruang lokal mesh
@@ -248,27 +322,52 @@ export class VoxelSystem {
     }
     const R = 4.5 + speed * 9;
     const K = 2.5 + speed * 12;
+    const span = RADIUS * 3.2;
 
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
-      let x = to[i3];
-      let y = to[i3 + 1];
-      let z = to[i3 + 2];
-      let s = toS[i];
+      let x: number;
+      let y: number;
+      let z: number;
+      let s: number;
+      let sy: number;
       let p = 1;
+      let pinch = 0;
 
-      if (moving) {
-        p = Math.min(1, Math.max(0, (clock - delay[i]) / DUR));
-        const e = p < 0.5 ? 4 * p * p * p : 1 - (-2 * p + 2) ** 3 / 2;
-        const arc = Math.sin(Math.PI * p) * 9;
-        x = from[i3] + (x - from[i3]) * e + dir[i3] * arc;
-        y = from[i3 + 1] + (y - from[i3 + 1]) * e + dir[i3 + 1] * arc;
-        z = from[i3 + 2] + (z - from[i3 + 2]) * e + dir[i3 + 2] * arc;
-        s = fromS[i] + (s - fromS[i]) * e;
-        cur[i3] = x;
-        cur[i3 + 1] = y;
-        cur[i3 + 2] = z;
-        curS[i] = s;
+      if (i >= body) {
+        // aliran paket: turun terus, muter balik ke atas
+        const l = i * 4;
+        const t = (lane[l + 2] + flow * lane[l + 3]) % 1;
+        x = lane[l];
+        z = lane[l + 1];
+        y = span / 2 - t * span;
+        // nongol & ilang pelan di ujung atas/bawah
+        const fade = Math.min(1, t * 6, (1 - t) * 6);
+        s = stream ? (0.24 + (i % 5) * 0.04) * fade : 0;
+        sy = s * (2 + rush * 2);
+      } else {
+        x = to[i3];
+        y = to[i3 + 1];
+        z = to[i3 + 2];
+        s = toS[i];
+        sy = s;
+
+        if (moving) {
+          p = Math.min(1, Math.max(0, (clock - delay[i]) / DUR));
+          const e = p < 0.5 ? 4 * p * p * p : 1 - (-2 * p + 2) ** 3 / 2;
+          // disedot ke jalur tengah (x,z → 0), jatuh ke bawah, lalu nyebar lagi
+          pinch = Math.sin(Math.PI * p);
+          const squeeze = 1 - pinch * 0.86;
+          x = (from[i3] + (x - from[i3]) * e) * squeeze;
+          y = from[i3 + 1] + (y - from[i3 + 1]) * e - pinch * 4;
+          z = (from[i3 + 2] + (z - from[i3 + 2]) * e) * squeeze;
+          s = fromS[i] + (s - fromS[i]) * e;
+          sy = s * (1 + pinch * 1.1);
+          cur[i3] = x;
+          cur[i3 + 1] = y;
+          cur[i3 + 2] = z;
+          curS[i] = s;
+        }
       }
 
       if (useRay) {
@@ -290,18 +389,17 @@ export class VoxelSystem {
       }
 
       const m = i * 16;
-      if (p >= 1) {
-        // diam: matriks skala + translasi langsung (jalur cepat)
+      if (pinch === 0) {
+        // diam / aliran: matriks skala + translasi langsung (jalur cepat)
         arr[m] = s; arr[m + 1] = 0; arr[m + 2] = 0; arr[m + 3] = 0;
-        arr[m + 4] = 0; arr[m + 5] = s; arr[m + 6] = 0; arr[m + 7] = 0;
+        arr[m + 4] = 0; arr[m + 5] = sy; arr[m + 6] = 0; arr[m + 7] = 0;
         arr[m + 8] = 0; arr[m + 9] = 0; arr[m + 10] = s; arr[m + 11] = 0;
         arr[m + 12] = x; arr[m + 13] = y; arr[m + 14] = z; arr[m + 15] = 1;
       } else {
-        // lagi terbang: sambil jungkir balik
-        const k = 1 - p;
+        // lagi lewat "kabel": molor + sedikit muter
         dummy.position.set(x, y, z);
-        dummy.rotation.set(rot[i * 2] * k, rot[i * 2 + 1] * k, 0);
-        dummy.scale.setScalar(s);
+        dummy.rotation.set(rot[i * 2] * pinch, rot[i * 2 + 1] * pinch, 0);
+        dummy.scale.set(s, sy, s);
         dummy.updateMatrix();
         dummy.matrix.toArray(arr, m);
       }

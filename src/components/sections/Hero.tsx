@@ -1,15 +1,14 @@
-import { Scramble } from "@/components/fx/Scramble";
-import { profile, skills } from "@/data/profile";
+import { Reassemble } from "@/components/fx/Reassemble";
+import { RequestHeaders } from "@/components/fx/RequestHeaders";
+import { profile } from "@/data/profile";
 import { HeroFx } from "./HeroFx";
 
 /**
- * Hero: "FULL" di kiri atas, "STACK" di kanan bawah, tumpukan kubus 3D di antaranya.
- * Kata raksasanya pake `cut` (blend difference): pas numpuk di atas kubus, warnanya kebalik.
+ * Hop 01 — Request. Pengunjung baru aja ngirim "GET /you".
+ * "GET" di kiri atas, "/YOU" di kanan bawah, paket 3D (amplop) melayang di antaranya.
+ * Hurufnya dateng sebagai paket acak (Reassemble). Kata raksasanya pake `cut` (blend difference).
  */
 export function Hero() {
-  // tiga grup skill pertama = tiga lempeng "stack" di scene 3D (atas → bawah)
-  const layers = skills.slice(0, 3);
-
   return (
     <section
       id="top"
@@ -19,63 +18,75 @@ export function Hero() {
     >
       <HeroFx />
 
-      <p className="text-dim text-small">
-        $ whoami <span className="text-(--stage-fg)">{profile.name}</span> / {profile.location}
+      <p data-node className="panel text-dim inline-flex w-fit flex-wrap gap-x-3 text-small">
+        <span className="text-accent font-bold">HOP 01/05</span>
+        <span>L0 / CLIENT</span>
+        <span>
+          {profile.name} — {profile.role}, {profile.location}
+        </span>
       </p>
 
-      {/* h1 cuma berisi tiga kata; info + tombol ditaruh di ruang kosong di antara "Full" dan "Stack" */}
       <div className="relative flex flex-1 flex-col">
         <h1 id="hero-title" className="flex flex-1 flex-col">
-          <span className="cut display mt-4 block text-hero">
-            <Scramble text="Full" when="boot" delay={0.5} duration={0.8} />
+          <span className="sr-only">
+            {profile.name}, {profile.role}.
           </span>
-          {/* ruang kosong: di HP ini "jendela" buat objek 3D, di desktop diisi info + tombol */}
+          <span className="cut display mt-6 block text-hero">
+            <Reassemble text="GET" when="boot" delay={0.4} />
+          </span>
+          {/* ruang kosong: di HP ini "jendela" buat paket 3D, di desktop diisi info + tombol */}
           <span aria-hidden="true" className="block min-h-[36svh] flex-1 lg:min-h-[15rem]" />
           <span className="cut display block text-right text-hero">
-            <Scramble text="Stack" when="boot" delay={0.75} duration={0.8} />
+            <Reassemble text="/YOU" when="boot" delay={0.7} />
           </span>
-          <span className="cut display mt-2 block text-right text-h3">
-            <Scramble text="Developer" when="boot" delay={1} duration={0.8} />
+          <span aria-hidden="true" className="cut mt-2 block text-right text-small">
+            HTTP/2 · {profile.role.toUpperCase()} · 5 HOPS
           </span>
         </h1>
 
-        <div data-in className="panel mt-8 max-w-[40ch] p-1 lg:absolute lg:left-0 lg:top-1/2 lg:mt-0 lg:-translate-y-[60%]">
+        {/* lg: nempel tepat di bawah "GET" (tinggi baris = ukuran text-hero × line-height 0.88 + mt-6) */}
+        <div
+          data-in
+          className="panel mt-8 max-w-[40ch] p-1 lg:absolute lg:left-0 lg:top-[calc(min(19vw,26svh)*0.88+3rem)] lg:mt-0"
+        >
           <p className="text-lead">{profile.tagline}</p>
           <div className="mt-6 flex flex-wrap gap-3">
             <a
-              href="#projects"
-              data-cursor="SCROLL"
+              href="#about"
+              data-cursor="SEND"
               className="bg-accent border border-(--stage-light) px-5 py-3 font-bold hover:bg-transparent hover:text-(--stage-fg)"
             >
-              See projects
+              Send request ↓
             </a>
             <a
               href="#contact"
+              data-cursor="200"
               className="border border-current px-5 py-3 font-bold hover:bg-(--stage-fg) hover:text-(--stage-dark)"
             >
-              Contact
+              Skip to response
             </a>
           </div>
         </div>
       </div>
 
-      {/* label lapisan: nempel di kanan tengah, sejajar tumpukan kubus */}
-      <dl
+      {/* header request milik pengunjung: nempel di kanan, sejajar paket 3D */}
+      <div
         data-in
-        className="panel absolute right-5 top-[30%] hidden w-64 border-l-2 border-(--stage-light) py-1 pl-4 text-small md:block sm:right-8"
+        className="panel line-fg absolute right-5 top-[24%] hidden w-72 border-l-2 border-l-(--stage-light) py-2 pl-4 text-small md:block sm:right-8"
       >
-        {layers.map((l, i) => (
-          <div key={l.group} className="py-1.5">
-            <dt className="text-accent font-bold">
-              L{layers.length - i} / {l.group}
-            </dt>
-            <dd className="text-dim">{l.items.slice(0, 2).join(", ")}</dd>
-          </div>
-        ))}
-      </dl>
+        <p className="font-bold">
+          <span className="method">GET</span> /you HTTP/2
+        </p>
+        <div className="mt-2">
+          <RequestHeaders />
+        </div>
+        <p className="text-dim mt-2 text-micro">↑ that&apos;s you. Live from your browser.</p>
+      </div>
 
-      <p data-in className="text-dim mt-6 max-w-[46ch] text-small">
-        Keep scrolling. The same 4,096 blocks rebuild themselves into every section.
+      <p data-in className="text-dim mt-6 max-w-[56ch] text-small">
+        <span className="panel">
+          You are the request. Scroll to travel the stack and come back with a response. Click anywhere empty to ping the server for real.
+        </span>
       </p>
     </section>
   );

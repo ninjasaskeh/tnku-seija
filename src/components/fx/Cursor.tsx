@@ -3,16 +3,13 @@
 import { useEffect, useRef } from "react";
 import { FINE_POINTER, gsap } from "@/lib/gsap";
 
-const pad = (n: number) => String(Math.max(0, Math.round(n))).padStart(4, "0");
-
 /**
- * Cursor crosshair + koordinat. Cuma aktif kalau ada mouse.
+ * Cursor = bingkai paket. Cuma aktif kalau ada mouse.
  * Elemen dengan data-cursor="TEKS" nampilin label itu pas di-hover.
  */
 export function Cursor() {
   const root = useRef<HTMLDivElement>(null);
   const ring = useRef<SVGSVGElement>(null);
-  const coords = useRef<HTMLSpanElement>(null);
   const label = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
@@ -31,7 +28,6 @@ export function Cursor() {
       xTo(e.clientX);
       yTo(e.clientY);
       el.style.opacity = "1";
-      if (coords.current) coords.current.textContent = `X:${pad(e.clientX)} Y:${pad(e.clientY)}`;
     };
 
     const over = (e: PointerEvent) => {
@@ -76,13 +72,11 @@ export function Cursor() {
         strokeWidth="1.25"
         className="absolute -left-[22px] -top-[22px]"
       >
-        <circle cx="22" cy="22" r="9" />
-        <path d="M22 0v15M22 29v15M0 22h15M29 22h15" />
+        <path d="M13 17v-4h4M27 13h4v4M31 27v4h-4M17 31h-4v-4" />
+        <path d="M22 0v9M22 35v9M0 22h9M35 22h9" />
       </svg>
       <span className="absolute -left-px -top-px size-[3px] bg-current" />
       <span className="absolute left-5 top-5 whitespace-nowrap text-micro leading-tight">
-        <span ref={coords}>X:0000 Y:0000</span>
-        <br />
         <span ref={label} className="font-bold" />
       </span>
     </div>

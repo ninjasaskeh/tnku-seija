@@ -6,6 +6,7 @@ import { useSyncExternalStore } from "react";
 const EVENT = "boot:done";
 
 export function markBooted() {
+  if (document.documentElement.dataset.booted === "1") return;
   document.documentElement.dataset.booted = "1";
   document.documentElement.classList.remove("is-booting");
   window.dispatchEvent(new Event(EVENT));

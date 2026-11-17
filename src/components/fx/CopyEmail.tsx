@@ -26,7 +26,7 @@ export function CopyEmail({ email }: { email: string }) {
       >
         Copy email
       </button>
-      <span role="status" className="ml-3 text-small font-bold">
+      <span role="status" className="ml-3 text-small font-bold empty:hidden">
         {state === "ok" && "Email copied"}
         {state === "fail" && "Could not copy. Select the address and copy it manually."}
       </span>

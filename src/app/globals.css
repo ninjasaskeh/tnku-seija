@@ -8,6 +8,7 @@
 
 /* ============================================================
    DESIGN TOKENS — acid graphics / cyber-brutalist
+   Konsep: ROUND TRIP (satu HTTP request nembus seluruh stack).
    Semua warna, font, dan ukuran diatur dari sini.
    ============================================================ */
 @theme {
@@ -55,6 +56,7 @@
 }
 
 html {
+  overflow-x: clip;
   scroll-padding-top: 4.5rem;
   background: var(--stage-dark);
   color: var(--stage-fg);
@@ -183,9 +185,92 @@ body {
   image-rendering: pixelated;
 }
 
+/* ---------- Grafik "jaringan" (konsep Round Trip) ---------- */
+
+/* Kabel horizontal putus-putus (warna = currentColor) */
+@utility wire-x {
+  height: 1px;
+  background: repeating-linear-gradient(90deg, currentColor 0 6px, transparent 6px 12px);
+}
+/* Kabel vertikal putus-putus */
+@utility wire-y {
+  width: 1px;
+  background: repeating-linear-gradient(180deg, currentColor 0 6px, transparent 6px 12px);
+}
+/* Data "ngalir" di kabel: polanya geser terus */
+@utility wire-flow {
+  animation: wire-flow 0.5s linear infinite;
+}
+@keyframes wire-flow {
+  to {
+    background-position: 12px 12px;
+  }
+}
+
+/* Huruf-paket (Reassemble): --pk 1 = masih kotak paket solid + nomor urut, 0 = huruf biasa.
+   --rt 1 = paket retransmit (garis putus-putus). Nilainya dianimasi GSAP. */
+.pkt {
+  --pk: 0;
+  --rt: 0;
+  background: color-mix(in srgb, currentColor calc(var(--pk) * 100%), transparent);
+  outline: 2px dashed color-mix(in srgb, currentColor calc(var(--rt) * 100%), transparent);
+  outline-offset: 2px;
+}
+.pkt::before {
+  content: attr(data-seq);
+  position: absolute;
+  left: 0;
+  top: -1.4em;
+  font: 700 var(--text-micro) / 1 var(--font-mono);
+  letter-spacing: 0;
+  opacity: var(--pk);
+}
+
+/* Badge method HTTP (GET/POST/...) */
+@utility method {
+  display: inline-block;
+  padding: 0 0.4em;
+  font-weight: 700;
+  background: var(--stage-light);
+  color: var(--stage-dark);
+}
+
+/* Kursor blok kedip ala terminal */
+@utility caret {
+  display: inline-block;
+  width: 0.6em;
+  height: 1em;
+  translate: 0 0.15em;
+  background: currentColor;
+  animation: caret 1s steps(1) infinite;
+}
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+
 /* ---------- Boot screen & cursor ---------- */
 html.is-booting {
   overflow: hidden;
+}
+/* Sebelum boot selesai, isi hero yang bakal dianimasi disembunyiin dulu.
+   Tanpa ini teksnya udah keliatan penuh di balik boot screen, lalu ilang & nyusun ulang (awkward).
+   Reduced motion / tanpa JS: tetep keliatan (lihat aturan di bawah & <noscript> di page.tsx). */
+html:not([data-booted]) [data-reasm="boot"] [data-c],
+html:not([data-booted]) #top [data-in] {
+  visibility: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-booted]) [data-reasm="boot"] [data-c],
+  html:not([data-booted]) #top [data-in] {
+    visibility: visible;
+  }
+}
+
+/* boot screen udah pernah tampil di tab ini → jangan dirender sama sekali (lihat layout.tsx) */
+html.boot-seen .boot {
+  display: none;
 }
 html.has-cursor,
 html.has-cursor * {
