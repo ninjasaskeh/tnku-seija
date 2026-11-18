@@ -125,6 +125,26 @@ function db(n: number): number[] {
   });
 }
 
+/** Jantung (hop Keep-Alive = heartbeat): kurva hati klasik, tebel & cembung di tengah. */
+function heart(n: number): number[] {
+  return fit(n, 18, 5, 0.5, (R) => {
+    const p: number[] = [];
+    const lim = Math.ceil(R * 1.3);
+    for (let x = -lim; x <= lim; x++) {
+      for (let y = -lim; y <= lim; y++) {
+        // (x²+y²-1)³ - x²y³ ≤ 0, dinormalisasi ke radius R
+        const u = x / R;
+        const v = y / R + 0.15;
+        const f = (u * u + v * v - 1) ** 3 - u * u * v ** 3;
+        if (f > 0) continue;
+        const depth = Math.max(2, Math.round(R * 0.35 * (1 - Math.min(1, Math.hypot(u, v - 0.2) * 0.6))) + 1);
+        for (let z = 0; z < depth; z++) p.push(x, y, z - depth / 2);
+      }
+    }
+    return p;
+  });
+}
+
 /** Teks/simbol apa pun → voxel: digambar ke canvas 2D kecil, tiap pixel yang keisi jadi kolom kubus. */
 function glyph(n: number, text: string, font: string, w: number, h: number): number[] {
   const c = document.createElement("canvas");
@@ -155,6 +175,7 @@ function points(id: string, n: number): number[] {
   if (id === "packet") return packet(n);
   if (id === "lock") return lock(n);
   if (id === "db") return db(n);
+  if (id === "heart") return heart(n);
   if (id === "ok") return glyph(n, "200", `900 30px ${FONT}`, 66, 32);
   if (id.startsWith("route")) {
     const label = String(Number(id.slice(5)) + 1).padStart(2, "0");

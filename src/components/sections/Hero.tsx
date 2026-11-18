@@ -1,6 +1,7 @@
 import { Reassemble } from "@/components/fx/Reassemble";
 import { RequestHeaders } from "@/components/fx/RequestHeaders";
 import type { Profile } from "@/lib/content-types";
+import { CHAPTER_ORDER } from "@/lib/stage";
 import { HeroFx } from "./HeroFx";
 
 /**
@@ -19,7 +20,7 @@ export function Hero({ profile }: { profile: Profile }) {
       <HeroFx />
 
       <p data-node className="panel text-dim inline-flex w-fit flex-wrap gap-x-3 text-small">
-        <span className="text-accent font-bold">HOP 01/05</span>
+        <span className="text-accent font-bold">HOP 01/{String(CHAPTER_ORDER.length).padStart(2, "0")}</span>
         <span>L0 / CLIENT</span>
         <span>
           {profile.name} — {profile.role}, {profile.location}
@@ -40,7 +41,7 @@ export function Hero({ profile }: { profile: Profile }) {
             <Reassemble text="/YOU" when="boot" delay={0.7} />
           </span>
           <span aria-hidden="true" className="cut mt-2 block text-right text-small">
-            HTTP/2 · {profile.role.toUpperCase()} · 5 HOPS
+            HTTP/2 · {profile.role.toUpperCase()} · {CHAPTER_ORDER.length} HOPS
           </span>
         </h1>
 

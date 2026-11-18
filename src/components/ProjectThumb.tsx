@@ -42,7 +42,7 @@ function Art({ project, index, id }: { project: Project; index: number; id: stri
 }
 
 /**
- * Thumbnail project. Pas kartunya di-hover, lapisan dither 1-bit nongol di atasnya.
+ * Thumbnail project. Pas kartu Response-nya di-hover (group/card), lapisan dither 1-bit nongol di atasnya.
  * Dither-nya murni CSS: gambar + pola Bayer → contrast() jadi hitam/putih → di-multiply ke acid.
  * Kalau project.thumbnail kosong, dipake gambar generatif per nomor.
  */

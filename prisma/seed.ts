@@ -19,6 +19,7 @@ async function main() {
     location: profile.location,
     tagline: profile.tagline,
     bio: profile.bio,
+    story: profile.story,
     facts: profile.facts,
     socials: profile.socials,
     email: profile.email,

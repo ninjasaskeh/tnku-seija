@@ -120,7 +120,7 @@ export function Projects() {
               data-active={i === active}
               className="line-fg border-t py-12 group-[.is-staged]/sec:absolute group-[.is-staged]/sec:inset-0 group-[.is-staged]/sec:border-0 group-[.is-staged]/sec:py-0 group-[.is-staged]/sec:data-[active=false]:invisible"
             >
-              <article className="group/card grid h-full grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-10">
+              <article className="grid h-full grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-10">
                 <div className="panel flex flex-col justify-center lg:col-span-7">
                   <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-small">
                     <span className="method">GET</span>
@@ -158,7 +158,7 @@ export function Projects() {
 
                 {/* nomor route 3D nongkrong di kanan atas, response body di kanan bawah */}
                 <div className="flex items-end justify-end lg:col-span-5 xl:pr-24">
-                  <div className="panel line-fg w-full max-w-[440px] border text-small">
+                  <div className="group/card panel line-fg w-full max-w-[440px] border text-small">
                     <p className="line-fg flex justify-between border-b px-3 py-1.5">
                       <span className="font-bold">Response</span>
                       <span className="text-dim">application/json</span>
@@ -199,22 +199,36 @@ const latency = (i: number) => 24 + ((i * 37) % 61);
 
 /** Body JSON project, diwarnain kayak syntax highlight. Isinya sama dengan teks di kiri → aria-hidden. */
 function Json({ project: p }: { project: Project }) {
-  const rows: [string, string][] = [
-    ["year", p.year],
-    ["role", `"${p.role}"`],
-    ["stack", `[${p.stack.map((s) => `"${s}"`).join(", ")}]`],
-  ];
+  const items = p.stack.map((s) => `"${s}"`);
+  // stack pendek tetap satu baris; kalau panjang, isinya turun ke blok sendiri (indent 4)
+  // biar baris lanjutannya nggak balik ke bawah tulisan "stack"
+  const inline = items.join(", ").length <= 24;
   return (
     <pre aria-hidden="true" className="overflow-x-auto px-3 py-2.5 leading-relaxed">
-      {"{\n"}
-      {rows.map(([k, v], i) => (
-        <span key={k}>
-          {"  "}
-          <span className="text-accent">&quot;{k}&quot;</span>: <span className="whitespace-pre-wrap">{v}</span>
-          {i < rows.length - 1 ? ",\n" : "\n"}
-        </span>
-      ))}
+      {"{\n  "}
+      <Key k="year" />: {p.year},{"\n  "}
+      <Key k="role" />: <span className="whitespace-pre-wrap">&quot;{p.role}&quot;</span>,{"\n  "}
+      <Key k="stack" />: [
+      {inline ? (
+        <>{items.join(", ")}]{"\n"}</>
+      ) : (
+        <>
+          <span className="block whitespace-normal pl-[4ch]">
+            {items.map((s, i) => (
+              <span key={i}>
+                <span className="whitespace-nowrap">
+                  {s}
+                  {i < items.length - 1 && ","}
+                </span>{" "}
+              </span>
+            ))}
+          </span>
+          {"  ]\n"}
+        </>
+      )}
       {"}"}
     </pre>
   );
 }
+
+const Key = ({ k }: { k: string }) => <span className="text-accent">&quot;{k}&quot;</span>;

@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- 5 kotak = 5 hop (sama dengan favicon dinamis di TabPresence.tsx) -->
+  <!-- 6 kotak = 6 hop (sama dengan favicon dinamis di TabPresence.tsx) -->
   <rect width="32" height="32" fill="#000"/>
   <g fill="#c6ff00">
     <rect x="3" y="6" width="8" height="8"/>
@@ -7,5 +7,6 @@
     <rect x="21" y="6" width="8" height="8"/>
     <rect x="3" y="17" width="8" height="8"/>
     <rect x="12" y="17" width="8" height="8"/>
+    <rect x="21" y="17" width="8" height="8"/>
   </g>
 </svg>

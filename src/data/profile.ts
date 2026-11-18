@@ -16,6 +16,11 @@ export const profile: Profile = {
     "Fullstack developer who takes a product from an empty repo to production: modelling the data, writing the API, and shipping an interface that feels fast.",
     "Placeholder. Replace this paragraph with your own story: your experience, the kind of projects you like, and how you work.",
   ],
+  story: [
+    "Placeholder. Where it started: the first thing you built, the moment code clicked for you.",
+    "Placeholder. What came next: how you went from that to building full products, and what you learned the hard way.",
+    "Placeholder. Why you keep going: the kind of problems that still get you excited to open the editor.",
+  ],
   facts: [
     { label: "Role", value: "Fullstack Developer" },
     { label: "Based in", value: "Indonesia" },
@@ -45,5 +50,6 @@ export const nav = [
   { label: "About", href: "#about" },
   { label: "Projects", href: "#projects" },
   { label: "Skills", href: "#skills" },
+  { label: "Story", href: "#keepalive" },
   { label: "Contact", href: "#contact" },
 ];

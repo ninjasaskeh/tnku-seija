@@ -13,6 +13,8 @@ export type Profile = {
   location: string;
   tagline: string;
   bio: string[];
+  /** cerita perjalanan buat hop Keep-Alive (paragraf urut) */
+  story: string[];
   facts: Fact[];
   /** zona waktu buat jam di section Contact */
   timezone: string;

@@ -9,13 +9,14 @@ const TITLES: Record<ChapterId, string> = {
   about: "⇄ handshaking…",
   projects: "⚙ routing /0",
   skills: "⛁ querying db…",
+  keepalive: "♥ keep-alive",
   contact: "✓ 200 OK",
 };
 
 /**
  * Tab browser ikut jadi bagian konsep:
  * - judul tab = status request di hop yang lagi aktif
- * - favicon digambar ulang: 5 kotak = 5 hop, yang udah dilewati nyala
+ * - favicon digambar ulang: 1 kotak per hop (2 baris × 3), yang udah dilewati nyala
  * - tab ditinggal → "connection idle", balik lagi → "reconnected"
  */
 export function TabPresence() {
@@ -44,7 +45,7 @@ export function TabPresence() {
       const i = stage.chapter ? CHAPTER_ORDER.indexOf(stage.chapter) : 0;
       ctx.fillStyle = "#000";
       ctx.fillRect(0, 0, 32, 32);
-      for (let k = 0; k < 5; k++) {
+      for (let k = 0; k < CHAPTER_ORDER.length; k++) {
         ctx.fillStyle = away ? "#3b2bff" : k <= i ? "#c6ff00" : "#2b2b2b";
         ctx.fillRect(3 + (k % 3) * 9, k < 3 ? 6 : 17, 8, 8);
       }

@@ -9,6 +9,7 @@ import {
   systemPrompt,
 } from "@/lib/chat";
 import { getContent } from "@/lib/content";
+import { getReferences } from "@/lib/references";
 import { db } from "@/lib/db";
 import { clientIp, hashIp, json } from "@/lib/request";
 
@@ -83,7 +84,7 @@ export async function POST(req: Request) {
   // percakapan harus dimulai dari user (kalau riwayat kepotong di tengah)
   while (messages.length && messages[0]!.role !== "user") messages.shift();
 
-  const content = await getContent();
+  const [content, references] = await Promise.all([getContent(), getReferences()]);
   const sid = sessionId;
   const encoder = new TextEncoder();
 
@@ -108,7 +109,7 @@ export async function POST(req: Request) {
           ...(supportsFallback(CHAT_MODEL)
             ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" as const }
             : {}),
-          system: [{ type: "text", text: systemPrompt(content), cache_control: { type: "ephemeral" } }],
+          system: [{ type: "text", text: systemPrompt(content, references), cache_control: { type: "ephemeral" } }],
           messages,
         });
 

@@ -14,6 +14,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { About } from "@/components/sections/About";
 import { Contact } from "@/components/sections/Contact";
 import { Hero } from "@/components/sections/Hero";
+import { KeepAlive } from "@/components/sections/KeepAlive";
 import { Projects } from "@/components/sections/Projects";
 import { Skills } from "@/components/sections/Skills";
 import { Stage } from "@/components/three/Stage";
@@ -30,7 +31,8 @@ import type { Content } from "@/lib/content-types";
  * - PingField    : klik area kosong = ping beneran
  * - Analytics    : catat kunjungan & hop yang dibuka (anonim) ke /api/track
  * - ChatLauncher : tombol chat mengambang; obrolannya sama dengan terminal di Handshake (ChatProvider)
- * - 5 hop      : Request (Hero), Handshake (About), Routes (Projects), Query (Skills), Response (Contact)
+ * - 6 hop      : Request (Hero), Handshake (About), Routes (Projects), Query (Skills),
+ *                Keep-Alive (cerita perjalanan), Response (Contact)
  *
  * Konten (`content`) dateng dari luar: dari database lewat src/app/page.tsx,
  * atau dari src/data lewat build preview (preview/main.tsx). Komponen client bacanya
@@ -66,6 +68,7 @@ export function Home({ content }: { content: Content }) {
           <About profile={profile} />
           <Projects />
           <Skills skills={skills} />
+        <KeepAlive profile={profile} />
           <Contact profile={profile} />
         </main>
         <ChatLauncher />

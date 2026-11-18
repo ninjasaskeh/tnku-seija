@@ -248,6 +248,15 @@ body {
   }
 }
 
+.chat-fade {
+  animation: chat-fade 160ms steps(3) both;
+}
+@keyframes chat-fade {
+  from {
+    opacity: 0;
+  }
+}
+
 /* Kursor blok kedip ala terminal */
 @utility caret {
   display: inline-block;

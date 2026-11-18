@@ -6,7 +6,14 @@ import { type ReactNode, Suspense } from "react";
 import { cx } from "./ui";
 
 type Item = {
-  href: "/admin" | "/admin/conversations" | "/admin/profile" | "/admin/skills" | "/admin/projects";
+  href:
+    | "/admin"
+    | "/admin/conversations"
+    | "/admin/profile"
+    | "/admin/story"
+    | "/admin/skills"
+    | "/admin/projects"
+    | "/admin/easter-eggs";
   label: string;
   path: string;
 };
@@ -16,17 +23,15 @@ const GROUPS: { title: string; items: Item[] }[] = [
     title: "Monitor",
     items: [
       { href: "/admin", label: "Overview", path: "~/overview" },
-      {
-        href: "/admin/conversations",
-        label: "Conversations",
-        path: "~/chat.log",
-      },
+      { href: "/admin/conversations", label: "Conversations", path: "~/chat.log" },
+      { href: "/admin/easter-eggs", label: "Easter eggs", path: "~/ai.lore" },
     ],
   },
   {
     title: "Content",
     items: [
       { href: "/admin/profile", label: "Profile", path: "~/profile" },
+      { href: "/admin/story", label: "Story", path: "~/keep-alive" },
       { href: "/admin/skills", label: "Skills", path: "~/skills" },
       { href: "/admin/projects", label: "Projects", path: "~/routes" },
     ],

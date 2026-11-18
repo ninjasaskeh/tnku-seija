@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 // sama dengan CHAPTER_ORDER di src/lib/stage.ts (nggak diimport biar route ini nggak narik GSAP)
-const CHAPTER_ORDER = ["hero", "about", "projects", "skills", "contact"];
+const CHAPTER_ORDER = ["hero", "about", "projects", "skills", "keepalive", "contact"];
 
 const VISIT_RE = /^[a-z0-9-]{8,64}$/i;
 const TYPES = new Set(["view", "hop"]);

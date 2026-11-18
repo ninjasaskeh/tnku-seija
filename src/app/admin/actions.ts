@@ -90,6 +90,22 @@ export async function saveProfile(_: ActionState, form: FormData): Promise<Actio
   return { ok: "Profile saved." };
 }
 
+/** Cerita Keep-Alive: tiap input "beat" = satu paragraf (urutan form = urutan di situs). */
+export async function saveStory(_: ActionState, form: FormData): Promise<ActionState> {
+  await requireAdmin();
+  const beats = form
+    .getAll("beat")
+    .map((v) => String(v).replace(/\s+/g, " ").trim().slice(0, 600))
+    .filter(Boolean)
+    .slice(0, 8);
+  const updated = await db()
+    .profile.update({ where: { id: 1 }, data: { story: beats } })
+    .catch(() => null);
+  if (!updated) return { error: "Save your profile first (Profile page), then add the story." };
+  updateTag(CONTENT_TAG);
+  return { ok: beats.length ? `Saved ${beats.length} beat${beats.length > 1 ? "s" : ""}.` : "Story cleared." };
+}
+
 /** Format: satu grup per baris, "Grup: item, item, item". Urutan baris = urutan di situs. */
 export async function saveSkills(_: ActionState, form: FormData): Promise<ActionState> {
   await requireAdmin();
@@ -187,4 +203,33 @@ export async function deleteChatSession(_: ActionState, form: FormData): Promise
   if (form.get("confirm") !== "on") return { error: "Tick the confirm box to delete." };
   await db().chatSession.delete({ where: { id } }).catch(() => null);
   redirect("/admin/conversations");
+}
+
+// ---------- easter egg AI ----------
+
+const KINDS = ["public", "friend", "other"];
+
+export async function saveReference(_: ActionState, form: FormData): Promise<ActionState> {
+  await requireAdmin();
+  const id = Number(form.get("id"));
+  const names = list(str(form, "names", 300)).map((n) => n.slice(0, 60)).slice(0, 10);
+  const note = str(form, "note", 500);
+  const kind = KINDS.includes(str(form, "kind", 10)) ? str(form, "kind", 10) : "other";
+  if (!names.length) return { error: "Add at least one name (comma separated for nicknames)." };
+  if (!note) return { error: "Write a note so the AI knows what to say." };
+  const data = { names, note, kind, enabled: form.get("enabled") === "on" };
+  if (id) await db().reference.update({ where: { id }, data });
+  else await db().reference.create({ data });
+  updateTag(CONTENT_TAG);
+  return { ok: id ? "Saved." : `Added ${names[0]}.` };
+}
+
+export async function deleteReference(_: ActionState, form: FormData): Promise<ActionState> {
+  await requireAdmin();
+  const id = Number(form.get("id"));
+  if (!id) return { error: "Missing entry." };
+  if (form.get("confirm") !== "on") return { error: "Tick the confirm box to delete." };
+  await db().reference.delete({ where: { id } }).catch(() => null);
+  updateTag(CONTENT_TAG);
+  return { ok: "Deleted." };
 }

@@ -36,6 +36,7 @@ export async function getContent(): Promise<Content> {
         location: profile.location,
         tagline: profile.tagline,
         bio: profile.bio,
+        story: profile.story ?? [],
         facts: asList<Fact>(profile.facts),
         socials: asList<Social>(profile.socials),
         email: profile.email,

@@ -115,8 +115,8 @@ function Dither() {
 
   useFrame(() => {
     const u = effect.uniforms;
-    // glitch tipis aja: sebagian besar dari pindah bab, gerakan mouse cuma nyumbang dikit. Calm = mati.
-    const g = calm.on ? 0 : Math.min(1, Math.max(pointer.speed * 0.35, stage.glitch * 0.6));
+    // glitch dari gerakan mouse (makin kenceng makin rusak) + lonjakan pas pindah bab. Calm = mati.
+    const g = calm.on ? 0 : Math.min(1, Math.max(pointer.speed, stage.glitch * 0.6));
     const base = Math.max(2, Math.round(2.5 * dpr));
     u.get("uGlitch")!.value = g;
     u.get("uPixel")!.value = base + Math.round(g * 3) * Math.ceil(dpr); // mouse kenceng → pixel membesar

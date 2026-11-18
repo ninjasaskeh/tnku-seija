@@ -23,6 +23,8 @@ model Profile {
   tagline       String
   /// paragraf bio, urut
   bio           String[]
+  /// cerita perjalanan (hop Keep-Alive), paragraf urut
+  story         String[] @default([])
   /// [{ label, value }]
   facts         Json
   /// [{ label, href }]
@@ -169,4 +171,20 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+/// "Easter egg" buat AI terminal: tokoh publik / temen yang dikenali AI kalau namanya disebut.
+/// Diisi admin (/admin/easter-eggs), dibaca system prompt chat. Bukan data publik di halaman.
+model Reference {
+  id        Int      @id @default(autoincrement())
+  /// "public" (tokoh publik) | "friend" (temen) | "other"
+  kind      String   @default("public")
+  /// nama + panggilan, mis. ["Prabowo", "wowo"]
+  names     String[]
+  /// fakta / cara jawab yang dimau pemilik situs
+  note      String
+  enabled   Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

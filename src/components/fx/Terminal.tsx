@@ -60,7 +60,7 @@ export function Terminal({
         data-lenis-prevent
         className={
           panel
-            ? "min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-3"
+            ? "min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-3 sm:px-4"
             : "h-72 overflow-y-auto overscroll-contain px-4 py-3"
         }
       >
@@ -99,7 +99,9 @@ export function Terminal({
           autoCapitalize="off"
           spellCheck={false}
           placeholder="ask anything, or: help"
-          className="min-w-0 flex-1 bg-transparent py-1 text-paper placeholder:text-ash/60 focus:outline-none"
+          enterKeyHint="send"
+          // 16px di HP: iOS nge-zoom otomatis kalau font input < 16px
+          className="min-w-0 flex-1 bg-transparent py-1 text-paper placeholder:text-ash/60 focus:outline-none max-sm:text-base"
         />
         <button
           type="submit"
