@@ -2,17 +2,19 @@
 
 import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { requireAdmin } from "@/lib/session";
 import { CONTENT_TAG } from "@/lib/content";
 import { db } from "@/lib/db";
 import { deleteImage, uploadImage } from "@/lib/storage";
+import { FLASH_COOKIE } from "@/lib/flash";
 
 /**
  * Server Actions admin. SEMUA mulai dengan requireAdmin() (login sendiri lewat Better Auth / Google),
  * dan semua input dari form divalidasi di sini (form di browser bisa dimanipulasi).
  */
+/** ok/error tampil sebagai toast di ActionForm. */
 export type ActionState = { ok?: string; error?: string } | null;
 
 const str = (f: FormData, k: string, max = 2000) => String(f.get(k) ?? "").trim().slice(0, max);
@@ -27,10 +29,14 @@ const list = (v: string) =>
     .map((s) => s.trim())
     .filter(Boolean);
 
-/** Link aman: http(s), mailto, path relatif, atau "#". Nolak javascript: dkk. */
+/**
+ * Link aman: http(s), mailto, path relatif, atau "#". Nolak javascript: dkk.
+ * Domain tanpa protokol (mis. "www.linkedin.com/in/nama") otomatis jadi "https://...".
+ */
 function safeUrl(v: string): string | null {
   if (!v) return null;
-  if (v === "#" || v.startsWith("/")) return v;
+  if (v === "#" || (v.startsWith("/") && !v.startsWith("//"))) return v; // "//host" = link luar, bukan path
+  if (/^[a-z0-9-]+(\.[a-z0-9-]+)+(:\d+)?([/?#]\S*)?$/i.test(v)) v = `https://${v}`;
   try {
     const u = new URL(v);
     return ["http:", "https:", "mailto:"].includes(u.protocol) ? v : null;
@@ -45,6 +51,14 @@ function pairs(v: string): [string, string][] {
     .map((l) => l.split("|").map((x) => x.trim()))
     .filter((p): p is [string, string] => p.length >= 2 && !!p[0] && !!p[1])
     .map(([a, ...b]) => [a, b.join("|").trim()]);
+}
+
+/**
+ * Pesan toast buat action yang redirect (hasil action-nya nggak pernah sampai ke form).
+ * Disimpan di cookie pendek, dibaca & dihapus FlashToast (src/components/admin/Toaster.tsx) di halaman tujuan.
+ */
+async function flash(message: string) {
+  (await cookies()).set(FLASH_COOKIE, message, { path: "/admin", maxAge: 30, sameSite: "lax" });
 }
 
 // ---------- sesi ----------
@@ -70,14 +84,15 @@ export async function saveProfile(_: ActionState, form: FormData): Promise<Actio
       .map((p) => p.replace(/\s*\n\s*/g, " ").trim())
       .filter(Boolean),
     facts: pairs(str(form, "facts", 2000)).map(([label, value]) => ({ label, value })),
-    socials: pairs(str(form, "socials", 2000))
-      .map(([label, href]) => ({ label, href: safeUrl(href) }))
-      .filter((s): s is { label: string; href: string } => !!s.href),
+    socials: pairs(str(form, "socials", 2000)).map(([label, href]) => ({ label, href: safeUrl(href) ?? "", raw: href })),
     email: str(form, "email", 120),
     timezone: str(form, "timezone", 60),
     timezoneLabel: str(form, "timezoneLabel", 10),
   };
   if (!data.name || !data.role || !data.domain) return { error: "Name, role and domain are required." };
+  const badLink = data.socials.find((s) => !s.href);
+  if (badLink) return { error: `Link "${badLink.label}" is not a valid URL: ${badLink.raw}` };
+  const socials = data.socials.map(({ label, href }) => ({ label, href }));
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) return { error: "Email looks invalid." };
   try {
     new Intl.DateTimeFormat("en", { timeZone: data.timezone });
@@ -85,7 +100,8 @@ export async function saveProfile(_: ActionState, form: FormData): Promise<Actio
     return { error: `Unknown timezone "${data.timezone}" (use e.g. Asia/Jakarta).` };
   }
 
-  await db().profile.upsert({ where: { id: 1 }, create: { id: 1, ...data }, update: data });
+  const row = { ...data, socials };
+  await db().profile.upsert({ where: { id: 1 }, create: { id: 1, ...row }, update: row });
   updateTag(CONTENT_TAG);
   return { ok: "Profile saved." };
 }
@@ -181,7 +197,10 @@ export async function saveProject(_: ActionState, form: FormData): Promise<Actio
   // gambar lama dibuang dari storage kalau udah diganti/dihapus
   if (prev?.thumbnail && prev.thumbnail !== d.thumbnail) await deleteImage(prev.thumbnail);
   updateTag(CONTENT_TAG);
-  if (createdId) redirect(`/admin/projects/${createdId}`);
+  if (createdId) {
+    await flash("Project created.");
+    redirect(`/admin/projects/${createdId}`);
+  }
   return { ok: "Project saved." };
 }
 
@@ -193,6 +212,7 @@ export async function deleteProject(_: ActionState, form: FormData): Promise<Act
   const gone = await db().project.delete({ where: { id } }).catch(() => null);
   await deleteImage(gone?.thumbnail);
   updateTag(CONTENT_TAG);
+  await flash(gone ? `Deleted "${gone.title}".` : "Project was already gone.");
   redirect("/admin/projects");
 }
 
@@ -202,6 +222,7 @@ export async function deleteChatSession(_: ActionState, form: FormData): Promise
   if (!id) return { error: "Missing session." };
   if (form.get("confirm") !== "on") return { error: "Tick the confirm box to delete." };
   await db().chatSession.delete({ where: { id } }).catch(() => null);
+  await flash("Conversation deleted.");
   redirect("/admin/conversations");
 }
 

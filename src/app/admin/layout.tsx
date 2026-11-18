@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Toaster } from "@/components/admin/Toaster";
 
 export const metadata: Metadata = {
   title: "Admin",
@@ -7,5 +8,10 @@ export const metadata: Metadata = {
 
 /** Layout area admin: polos, gelap, tanpa efek panggung 3D halaman utama. */
 export default function AdminLayout({ children }: LayoutProps<"/admin">) {
-  return <div className="min-h-dvh bg-ink text-small text-paper">{children}</div>;
+  return (
+    <div className="min-h-dvh bg-ink text-small text-paper">
+      {children}
+      <Toaster />
+    </div>
+  );
 }

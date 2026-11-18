@@ -7,6 +7,7 @@ import { useContent } from "@/components/ContentProvider";
 import type { Project } from "@/lib/content-types";
 import { gsap, MOTION_OK, RAIL, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { lenisRef } from "@/lib/lenis";
+import { newTab } from "@/lib/link";
 import { setProject } from "@/lib/stage";
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -137,6 +138,7 @@ export function Projects() {
                       {p.links.live && (
                         <a
                           href={p.links.live}
+                          {...newTab(p.links.live)}
                           data-cursor="OPEN"
                           className="bg-accent border border-(--stage-light) px-4 py-2 hover:bg-transparent hover:text-(--stage-fg)"
                         >
@@ -146,6 +148,7 @@ export function Projects() {
                       {p.links.repo && (
                         <a
                           href={p.links.repo}
+                          {...newTab(p.links.repo)}
                           data-cursor="CODE"
                           className="border border-current px-4 py-2 hover:bg-(--stage-fg) hover:text-(--stage-dark)"
                         >

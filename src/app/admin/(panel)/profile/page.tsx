@@ -77,7 +77,7 @@ async function ProfileForm() {
             defaultValue={asList<Social>(p?.socials)
               .map((s) => `${s.label} | ${s.href}`)
               .join("\n")}
-            hint="One per line: Label | https://…"
+            hint="One per line: Label | https://… (www.… or domain.com/… gets https:// added)"
             placeholder="GitHub | https://github.com/you"
           />
         </Panel>

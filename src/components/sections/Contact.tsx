@@ -6,6 +6,7 @@ import { RoundTrip } from "@/components/fx/RoundTrip";
 import { Scramble } from "@/components/fx/Scramble";
 import { HopHeading } from "@/components/layout/Hop";
 import type { Profile } from "@/lib/content-types";
+import { newTab } from "@/lib/link";
 import { ContactFx } from "./ContactFx";
 
 /**
@@ -57,7 +58,7 @@ export function Contact({ profile }: { profile: Profile }) {
                 <dt className="mr-2 inline font-bold">Link:</dt>
                 <dd className="inline">
                   &lt;
-                  <a href={s.href} className="underline underline-offset-4 hover:bg-(--stage-fg) hover:text-(--stage-dark)">
+                  <a href={s.href} {...newTab(s.href)} className="underline underline-offset-4 hover:bg-(--stage-fg) hover:text-(--stage-dark)">
                     {s.href.replace(/^https?:\/\//, "")}
                   </a>
                   &gt;; rel=&quot;{s.label.toLowerCase()}&quot;
@@ -82,6 +83,7 @@ export function Contact({ profile }: { profile: Profile }) {
               <Magnetic key={s.label}>
                 <a
                   href={s.href}
+                  {...newTab(s.href)}
                   className="panel inline-block border border-current px-5 py-3 font-bold hover:bg-(--stage-fg) hover:text-(--stage-dark)"
                 >
                   {s.label}

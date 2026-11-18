@@ -1,6 +1,7 @@
 "use client";
 
-import { type ReactNode, useActionState } from "react";
+import { type ReactNode, useActionState, useEffect } from "react";
+import { toast } from "sonner";
 import type { ActionState } from "@/app/admin/actions";
 import { btn, cx } from "./ui";
 
@@ -14,17 +15,23 @@ type Props = {
   aside?: ReactNode;
 };
 
-/** Form admin: kirim ke Server Action, status sukses/error tampil di bar tombol. */
+/**
+ * Form admin: kirim ke Server Action, hasilnya muncul sebagai toast (sonner).
+ * Action yang redirect nggak balik ke sini; pesannya lewat flash cookie (lihat FlashToast).
+ */
 export function ActionForm({ action, submit, children, className, danger = false, aside }: Props) {
   const [state, run, pending] = useActionState(action, null);
+
+  useEffect(() => {
+    if (state?.error) toast.error(state.error, { duration: 6000 });
+    else if (state?.ok) toast.success(state.ok);
+  }, [state]);
+
   return (
     <form action={run} className={className} aria-busy={pending}>
       {children}
       <div className="mt-5 flex flex-wrap items-center justify-end gap-3 border-t border-line pt-4">
-        <p role="status" className="mr-auto text-small">
-          {state?.ok && <span className="text-acid">✓ {state.ok}</span>}
-          {state?.error && <span className="text-violet">✕ {state.error}</span>}
-        </p>
+        <span className="mr-auto" />
         {aside}
         <button type="submit" disabled={pending} className={btn(danger ? "danger" : "primary")}>
           {pending && <span aria-hidden="true" className="size-3 animate-spin border-2 border-current border-t-transparent" />}
