@@ -36,12 +36,22 @@ export function About({ profile }: { profile: Profile }) {
 
         <div className="min-w-0 lg:col-span-7 lg:col-start-6">
           <ol className="max-w-[62ch] space-y-8">
-            <li data-step className="panel grid grid-cols-[5.5rem_1fr] gap-x-4 text-small">
+            <li
+              data-step
+              className="panel grid grid-cols-[5.5rem_1fr] gap-x-4 text-small"
+            >
               <span className="text-accent font-bold">→ SYN</span>
-              <span className="text-dim">client: who&apos;s on the other end?</span>
+              <span className="text-dim">
+                client: who&apos;s on the other end?
+              </span>
             </li>
-            <li data-step className="panel grid gap-x-4 sm:grid-cols-[5.5rem_1fr] [&>*]:min-w-0">
-              <span className="text-accent text-small font-bold">← SYN-ACK</span>
+            <li
+              data-step
+              className="panel grid gap-x-4 sm:grid-cols-[5.5rem_1fr] [&>*]:min-w-0"
+            >
+              <span className="text-accent text-small font-bold">
+                ← SYN-ACK
+              </span>
               <div>
                 <p data-about-lead className="text-h3 leading-[1.25]">
                   {lead}
@@ -53,9 +63,14 @@ export function About({ profile }: { profile: Profile }) {
                 ))}
               </div>
             </li>
-            <li data-step className="panel grid grid-cols-[5.5rem_1fr] gap-x-4 text-small">
+            <li
+              data-step
+              className="panel grid grid-cols-[5.5rem_1fr] gap-x-4 text-small"
+            >
               <span className="text-accent font-bold">→ ACK</span>
-              <span className="text-dim">client: connection trusted. Show me the certificate.</span>
+              <span className="text-dim">
+                client: connection trusted. Show me the certificate.
+              </span>
             </li>
           </ol>
 
@@ -65,30 +80,42 @@ export function About({ profile }: { profile: Profile }) {
               <span className="bg-accent px-1.5 font-bold">● VALID</span>
             </figcaption>
             <dl className="px-4 py-2">
-              <div data-fact className="line-fg grid grid-cols-[7rem_1fr] gap-4 border-b border-dashed py-2.5">
+              <div
+                data-fact
+                className="line-fg grid grid-cols-[7rem_1fr] gap-4 border-b border-dashed py-2.5"
+              >
                 <dt className="text-dim text-small">Subject</dt>
                 <dd>CN={profile.name}</dd>
               </div>
               {profile.facts.map((f) => (
-                <div key={f.label} data-fact className="line-fg grid grid-cols-[7rem_1fr] gap-4 border-b border-dashed py-2.5">
+                <div
+                  key={f.label}
+                  data-fact
+                  className="line-fg grid grid-cols-[7rem_1fr] gap-4 border-b border-dashed py-2.5"
+                >
                   <dt className="text-dim text-small">{f.label}</dt>
                   <dd>{f.value}</dd>
                 </div>
               ))}
               <div data-fact className="grid grid-cols-[7rem_1fr] gap-4 py-2.5">
                 <dt className="text-dim text-small">Fingerprint</dt>
-                <dd className="text-dim break-all text-small">SHA256 {fingerprint(profile.name)}</dd>
+                <dd className="text-dim break-all text-small">
+                  SHA256 {fingerprint(profile.name)}
+                </dd>
               </div>
             </dl>
-            <p className="line-fg text-dim border-t px-4 py-2 text-micro">Issuer: self-signed. Verified by shipped work, see next hop.</p>
+            <p className="line-fg text-dim border-t px-4 py-2 text-micro">
+              Issuer: self-signed. Verified by shipped work, see next hop.
+            </p>
           </figure>
 
           <div data-inline-terminal className="mt-12 max-w-[62ch]">
-            <p className="panel text-dim mb-3 inline-block text-small">Socket is open. Ask directly:</p>
+            <p className="panel text-dim mb-3 inline-block text-small">
+              Socket is open. Ask directly:
+            </p>
             <Terminal />
             <p className="panel text-dim mt-2 inline-block text-micro">
-              Answers come from an AI that only knows what&apos;s on this site. Questions are saved (without your IP) so I
-              can read them.
+              Answers come from an AI that only knows what&apos;s on this site.
             </p>
           </div>
         </div>

@@ -10,7 +10,7 @@ import { newTab } from "@/lib/link";
 import { ContactFx } from "./ContactFx";
 
 /**
- * Hop 05 — Response. Request balik ke pengunjung: 200 OK.
+ * Hop 07 — Response. Request balik ke pengunjung: 200 OK.
  * Kontak ditulis sebagai header response; email = header Location.
  * Di bawah: total round trip (lama pengunjung di halaman) + nama raksasa.
  */

@@ -5,7 +5,8 @@ import { FINE_POINTER, gsap, MOTION_OK } from "@/lib/gsap";
 import { calm } from "@/lib/calm";
 import { ping } from "@/lib/net";
 
-const SKIP = "a, button, input, textarea, select, label, [data-cursor], [role='log'], table";
+const SKIP =
+  "a, button, input, textarea, select, label, [data-cursor], [role='log'], table, [data-vaul-drawer], [data-vaul-overlay]";
 
 /**
  * Klik di area kosong mana aja = kirim ping BENERAN ke server.

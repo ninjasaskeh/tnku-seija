@@ -1,17 +1,34 @@
 "use client";
 
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useContent } from "@/components/ContentProvider";
 import { ping } from "@/lib/net";
 import { CHAPTER_ORDER, CHAPTERS } from "@/lib/stage";
 
-export type Line = { id: number; kind: "in" | "out" | "err" | "ai"; text: string };
+export type Line = {
+  id: number;
+  kind: "in" | "out" | "err" | "ai";
+  text: string;
+};
 
 const SESSION_KEY = "portfolio:chat";
 export const MAX_LEN = 600;
 
 let nextId = 0;
-const line = (kind: Line["kind"], text: string): Line => ({ id: nextId++, kind, text });
+const line = (kind: Line["kind"], text: string): Line => ({
+  id: nextId++,
+  kind,
+  text,
+});
 
 type Chat = {
   lines: Line[];
@@ -30,9 +47,9 @@ const ChatContext = createContext<Chat | null>(null);
  *   id sesinya di sessionStorage biar konteks nyambung selama tab kebuka.
  */
 export function ChatProvider({ children }: { children: ReactNode }) {
-  const { profile, skills, projects } = useContent();
+  const { profile, skills, projects, experience } = useContent();
   const [lines, setLines] = useState<Line[]>(() => [
-    line("out", "Ask me anything in plain English, or type a command (help)."),
+    line("out", "Ask me anything, or type a command (help)."),
   ]);
   const [busy, setBusy] = useState(false);
   const busyRef = useRef(false);
@@ -40,24 +57,42 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => () => abort.current?.abort(), []);
 
-  const push = useCallback((...ls: Line[]) => setLines((prev) => [...prev, ...ls].slice(-80)), []);
+  const push = useCallback(
+    (...ls: Line[]) => setLines((prev) => [...prev, ...ls].slice(-80)),
+    [],
+  );
   const patch = useCallback(
-    (id: number, text: string) => setLines((prev) => prev.map((l) => (l.id === id ? { ...l, text } : l))),
+    (id: number, text: string) =>
+      setLines((prev) => prev.map((l) => (l.id === id ? { ...l, text } : l))),
     [],
   );
 
   const commands = useMemo<Record<string, () => string[]>>(
     () => ({
       help: () => [
-        "Commands: whoami, traceroute, ping, curl, skills, projects, contact, clear",
+        "Commands: whoami, traceroute, ping, curl, experience, skills, projects, contact, clear",
         "Anything else is sent to an AI that answers as me, based on this site.",
       ],
       whoami: () => [`${profile.name} / ${profile.role}`, profile.tagline],
-      skills: () => skills.map((s) => `${s.group.padEnd(9)} ${s.items.join(", ")}`),
+      skills: () =>
+        skills.map((s) => `${s.group.padEnd(9)} ${s.items.join(", ")}`),
       projects: () =>
-        projects.map((p, i) => `${String(i + 1).padStart(2, "0")}  ${p.title} (${p.year}) / ${p.stack.join(", ")}`),
-      contact: () => [profile.email, ...profile.socials.map((s) => `${s.label}: ${s.href}`)],
-      ls: () => ["about/  projects/  skills/  contact/"],
+        projects.map(
+          (p, i) =>
+            `${String(i + 1).padStart(2, "0")}  ${p.title} (${p.year}) / ${p.stack.join(", ")}`,
+        ),
+      experience: () =>
+        experience.length
+          ? experience.map(
+              (e) =>
+                `${e.start} → ${(e.end ?? "now").padEnd(7)}  ${e.role} @ ${e.company}`,
+            )
+          : ["access.log is empty for now."],
+      contact: () => [
+        profile.email,
+        ...profile.socials.map((s) => `${s.label}: ${s.href}`),
+      ],
+      ls: () => ["about/  projects/  experience/  skills/  contact/"],
       traceroute: () => [
         `traceroute to ${profile.domain}, ${CHAPTER_ORDER.length} hops max`,
         ...CHAPTER_ORDER.map((id, i) => {
@@ -69,11 +104,26 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         "HTTP/2 200",
         "content-type: application/json",
         "",
-        JSON.stringify({ name: profile.name, role: profile.role, email: profile.email, open: true }, null, 2),
+        JSON.stringify(
+          {
+            name: profile.name,
+            role: profile.role,
+            email: profile.email,
+            open: true,
+          },
+          null,
+          2,
+        ),
       ],
       sudo: () => ["Permission denied. Nice try."],
+      // easter egg: sengaja nggak masuk daftar `help`
+      credits: () => [
+        "Built with: Next.js, React, Three.js (R3F), GSAP, Lenis, Tailwind CSS",
+        "Backend: PostgreSQL + Prisma, Better Auth, Claude API for this terminal",
+        "Pair-programmed with Claude Code. Thanks for the late nights.",
+      ],
     }),
-    [profile, skills, projects],
+    [profile, skills, projects, experience],
   );
 
   // ping beneran: 3 request HEAD ke server ini, hasilnya nongol satu-satu
@@ -82,7 +132,12 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     for (let i = 0; i < 3; i++) {
       const ms = await ping();
       if (ms === null) {
-        push(line("err", "Request timeout: no route (offline or opened from a file)."));
+        push(
+          line(
+            "err",
+            "Request timeout: no route (offline or opened from a file).",
+          ),
+        );
         return;
       }
       got.push(ms);
@@ -118,9 +173,17 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           signal: ctrl.signal,
         });
         if (!res.ok || !res.body) {
-          const data = (await res.json().catch(() => null)) as { error?: string } | null;
+          const data = (await res.json().catch(() => null)) as {
+            error?: string;
+          } | null;
           setLines((prev) => prev.filter((l) => l.id !== reply.id));
-          push(line("err", data?.error ?? `HTTP ${res.status}. Try again, or email ${profile.email}.`));
+          push(
+            line(
+              "err",
+              data?.error ??
+                `HTTP ${res.status}. Try again, or email ${profile.email}.`,
+            ),
+          );
           return;
         }
         const sid = res.headers.get("x-chat-session");
@@ -142,7 +205,12 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       } catch (err) {
         if ((err as Error).name === "AbortError") return;
         setLines((prev) => prev.filter((l) => l.id !== reply.id || l.text));
-        push(line("err", `Connection dropped. Try again, or email ${profile.email}.`));
+        push(
+          line(
+            "err",
+            `Connection dropped. Try again, or email ${profile.email}.`,
+          ),
+        );
       } finally {
         busyRef.current = false;
         setBusy(false);
@@ -164,7 +232,12 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       push(line("in", input));
       const word = cmd.split(/\s+/)[0]!;
       if (word === "ping") {
-        push(line("out", `PING ${profile.domain}: real packets, from your browser`));
+        push(
+          line(
+            "out",
+            `PING ${profile.domain}: real packets, from your browser`,
+          ),
+        );
         pingLive();
         return;
       }

@@ -75,6 +75,44 @@ function packet(n: number): number[] {
   });
 }
 
+/**
+ * Jendela terminal (hop Logs): bingkai + title bar dengan 3 lubang tombol, isinya baris-baris log
+ * dengan panjang beda-beda (timestamp pendek, spasi, pesan), baris terakhir = kursor.
+ */
+function log(n: number): number[] {
+  return fit(n, 60, 14, 2, (W) => {
+    const H = Math.round(W * 0.68);
+    const t = Math.max(1, Math.round(W / 28)); // tebel satu baris teks
+    const bar = t * 2 + 1; // tinggi title bar
+    const pad = t + 1;
+    const LENS = [0.82, 0.55, 0.9, 0.38, 0.7, 0.62, 0.48];
+    const stamp = Math.max(2, Math.round(W * 0.16));
+    const p: number[] = [];
+    for (let x = 0; x < W; x++) {
+      for (let y = 0; y < H; y++) {
+        // y naik ke atas: title bar di y paling gede
+        const edge = x < 1 || y < 1 || x > W - 2 || y > H - 2;
+        const title = y >= H - bar;
+        const cy = H - bar - 1 - y + 1; // jarak dari bawah title bar (mulai 1)
+        const dot = title && !edge && y === H - 1 - Math.ceil(bar / 2) && [2, 4, 6].some((d) => Math.abs(x - d * t) < Math.max(1, t * 0.6));
+        let line = false;
+        if (!title && !edge && cy > pad - 1 && x >= pad && y > t) {
+          const row = Math.floor((cy - pad) / (t * 2));
+          const inRow = (cy - pad) % (t * 2) < t;
+          const len = Math.round((W - pad * 2) * LENS[row % LENS.length]!);
+          const last = (row + 2) * t * 2 + pad > H - bar - t; // baris terakhir yang masih muat → kursor
+          const cx = x - pad;
+          line = inRow && (last ? cx < t * 2 : cx < len && (cx < stamp || cx > stamp + t));
+        }
+        // isinya bolong (tanpa pelat belakang) biar baris-baris log kebaca setelah di-dither
+        const depth = edge || (title && !dot) ? 3 : line ? 2 : 0;
+        for (let z = 0; z < depth; z++) p.push(x, y, z);
+      }
+    }
+    return p;
+  });
+}
+
 /** Gembok TLS: badan dengan lubang kunci + busur (shackle) di atas. */
 function lock(n: number): number[] {
   return fit(n, 16, 5, 0.5, (R) => {
@@ -174,6 +212,7 @@ const FONT = '"Archivo Variable", "Arial Black", sans-serif';
 function points(id: string, n: number): number[] {
   if (id === "packet") return packet(n);
   if (id === "lock") return lock(n);
+  if (id === "log") return log(n);
   if (id === "db") return db(n);
   if (id === "heart") return heart(n);
   if (id === "ok") return glyph(n, "200", `900 30px ${FONT}`, 66, 32);

@@ -13,6 +13,7 @@ import { TraceHud } from "@/components/fx/TraceHud";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { About } from "@/components/sections/About";
 import { Contact } from "@/components/sections/Contact";
+import { Experience } from "@/components/sections/Experience";
 import { Hero } from "@/components/sections/Hero";
 import { KeepAlive } from "@/components/sections/KeepAlive";
 import { Projects } from "@/components/sections/Projects";
@@ -31,15 +32,15 @@ import type { Content } from "@/lib/content-types";
  * - PingField    : klik area kosong = ping beneran
  * - Analytics    : catat kunjungan & hop yang dibuka (anonim) ke /api/track
  * - ChatLauncher : tombol chat mengambang; obrolannya sama dengan terminal di Handshake (ChatProvider)
- * - 6 hop      : Request (Hero), Handshake (About), Routes (Projects), Query (Skills),
- *                Keep-Alive (cerita perjalanan), Response (Contact)
+ * - 7 hop      : Request (Hero), Handshake (About), Routes (Projects), Logs (Experience),
+ *                Query (Skills), Keep-Alive (cerita perjalanan), Response (Contact)
  *
  * Konten (`content`) dateng dari luar: dari database lewat src/app/page.tsx,
  * atau dari src/data lewat build preview (preview/main.tsx). Komponen client bacanya
  * pake useContent(); komponen server dapet lewat props.
  */
 export function Home({ content }: { content: Content }) {
-  const { profile, skills } = content;
+  const { profile, skills, experience } = content;
   return (
     <ContentProvider value={content}>
       <ChatProvider>
@@ -67,8 +68,9 @@ export function Home({ content }: { content: Content }) {
           <Hero profile={profile} />
           <About profile={profile} />
           <Projects />
+          <Experience experience={experience} />
           <Skills skills={skills} />
-        <KeepAlive profile={profile} />
+          <KeepAlive profile={profile} />
           <Contact profile={profile} />
         </main>
         <ChatLauncher />

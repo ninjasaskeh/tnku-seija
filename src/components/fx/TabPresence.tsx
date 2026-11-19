@@ -8,6 +8,7 @@ const TITLES: Record<ChapterId, string> = {
   hero: "→ GET /you",
   about: "⇄ handshaking…",
   projects: "⚙ routing /0",
+  logs: "▤ tail -f access.log",
   skills: "⛁ querying db…",
   keepalive: "♥ keep-alive",
   contact: "✓ 200 OK",
@@ -16,7 +17,7 @@ const TITLES: Record<ChapterId, string> = {
 /**
  * Tab browser ikut jadi bagian konsep:
  * - judul tab = status request di hop yang lagi aktif
- * - favicon digambar ulang: 1 kotak per hop (2 baris × 3), yang udah dilewati nyala
+ * - favicon digambar ulang: 1 kotak per hop (2 baris), yang udah dilewati nyala
  * - tab ditinggal → "connection idle", balik lagi → "reconnected"
  */
 export function TabPresence() {
@@ -45,9 +46,16 @@ export function TabPresence() {
       const i = stage.chapter ? CHAPTER_ORDER.indexOf(stage.chapter) : 0;
       ctx.fillStyle = "#000";
       ctx.fillRect(0, 0, 32, 32);
-      for (let k = 0; k < CHAPTER_ORDER.length; k++) {
+      // 2 baris, baris atas dapet sisa kalau ganjil (7 hop = 4 + 3), tiap baris di tengah
+      const n = CHAPTER_ORDER.length;
+      const cols = Math.ceil(n / 2);
+      const size = Math.floor((28 - (cols - 1)) / cols);
+      for (let k = 0; k < n; k++) {
+        const row = k < cols ? 0 : 1;
+        const inRow = row ? n - cols : cols;
+        const x0 = Math.round((32 - (inRow * size + (inRow - 1))) / 2);
         ctx.fillStyle = away ? "#3b2bff" : k <= i ? "#c6ff00" : "#2b2b2b";
-        ctx.fillRect(3 + (k % 3) * 9, k < 3 ? 6 : 17, 8, 8);
+        ctx.fillRect(x0 + (row ? k - cols : k) * (size + 1), row ? 17 : 17 - size - 2, size, size);
       }
       const url = c.toDataURL("image/png");
       for (const l of links) {

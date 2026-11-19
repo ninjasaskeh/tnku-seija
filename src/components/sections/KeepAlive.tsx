@@ -5,7 +5,7 @@ import { KeepAliveFx } from "./KeepAliveFx";
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /**
- * Hop 05 — Keep-Alive. "Connection: keep-alive" = yang bikin koneksi (dan pemilik situs) tetep nyala:
+ * Hop 06 — Keep-Alive. "Connection: keep-alive" = yang bikin koneksi (dan pemilik situs) tetep nyala:
  * cerita perjalanannya. Tiap paragraf `profile.story` = satu "detak" di timeline.
  * Jantung 3D ada di kanan, jadi isi di kiri.
  */

@@ -9,6 +9,7 @@ import { CONTENT_TAG } from "@/lib/content";
 import { db } from "@/lib/db";
 import { deleteImage, uploadImage } from "@/lib/storage";
 import { FLASH_COOKIE } from "@/lib/flash";
+import { EXPERIENCE_KINDS } from "@/lib/content-types";
 
 /**
  * Server Actions admin. SEMUA mulai dengan requireAdmin() (login sendiri lewat Better Auth / Google),
@@ -140,6 +141,69 @@ export async function saveSkills(_: ActionState, form: FormData): Promise<Action
   ]);
   updateTag(CONTENT_TAG);
   return { ok: `Saved ${groups.length} groups.` };
+}
+
+const MONTH_RE = /^\d{4}-(0[1-9]|1[0-2])$/;
+const MAX_JOBS = 12;
+
+/**
+ * Riwayat kerja (hop Logs). Tiap kartu di ExperienceEditor ngirim input dengan nama yang sama
+ * (company, role, kind, ...), jadi getAll(nama)[i] = kartu ke-i. Urutan kartu = urutan di situs.
+ * Semua baris diganti sekaligus, kayak saveSkills.
+ */
+export async function saveExperience(_: ActionState, form: FormData): Promise<ActionState> {
+  await requireAdmin();
+  const col = (k: string, max: number) => form.getAll(k).map((v) => String(v).trim().slice(0, max));
+  const company = col("company", 80);
+  const role = col("role", 80);
+  const kind = col("kind", 20);
+  const location = col("location", 80);
+  const start = col("start", 7);
+  const end = col("end", 7);
+  const summary = col("summary", 600);
+  const highlights = col("highlights", 2000);
+  const stack = col("stack", 400);
+  const url = col("url", 300);
+
+  const jobs = [];
+  for (let i = 0; i < company.length; i++) {
+    const n = i + 1;
+    const blank = !company[i] && !role[i] && !start[i] && !summary[i] && !highlights[i];
+    if (blank) continue; // kartu kosong dilewatin
+    if (!company[i] || !role[i]) return { error: `Entry ${n}: company and role are required.` };
+    if (!MONTH_RE.test(start[i] ?? "")) return { error: `Entry ${n}: start must look like 2024-03.` };
+    const e = end[i] || null;
+    if (e && !MONTH_RE.test(e)) return { error: `Entry ${n}: end must look like 2025-01, or stay empty if you still work there.` };
+    if (e && e < start[i]!) return { error: `Entry ${n}: end is before start.` };
+    const link = url[i] ? safeUrl(url[i]!) : null;
+    if (url[i] && !link) return { error: `Entry ${n}: link is not a valid URL: ${url[i]}` };
+    jobs.push({
+      company: company[i]!,
+      role: role[i]!,
+      kind: (EXPERIENCE_KINDS as readonly string[]).includes(kind[i] ?? "") ? kind[i]! : "full-time",
+      location: location[i] ?? "",
+      start: start[i]!,
+      end: e,
+      summary: summary[i] ?? "",
+      highlights: lines(highlights[i] ?? "").map((h) => h.replace(/^[-*•]\s*/, "").slice(0, 300)).slice(0, 8),
+      stack: list(stack[i] ?? "").map((x) => x.slice(0, 40)).slice(0, 12),
+      url: link,
+    });
+  }
+  if (jobs.length > MAX_JOBS) return { error: `Keep it to ${MAX_JOBS} entries or fewer.` };
+
+  const prisma = db();
+  try {
+    await prisma.$transaction([
+      prisma.experience.deleteMany(),
+      prisma.experience.createMany({ data: jobs.map((j, i) => ({ ...j, order: i })) }),
+    ]);
+  } catch (e) {
+    console.error("[saveExperience]", (e as Error).message);
+    return { error: "Could not save. Did you run the database migration (npm run db:deploy)?" };
+  }
+  updateTag(CONTENT_TAG);
+  return { ok: jobs.length ? `Saved ${jobs.length} entr${jobs.length > 1 ? "ies" : "y"}.` : "Experience cleared." };
 }
 
 function projectData(form: FormData) {

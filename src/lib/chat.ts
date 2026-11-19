@@ -79,7 +79,7 @@ export async function checkLimits(ipHash: string, sessionId: string | null): Pro
  * PR, esai, tutorial panjang) ditolak dengan bercanda.
  * Konten stabil (dari DB, di-cache) → prompt-nya stabil juga, jadi bisa kena prompt caching.
  */
-export function systemPrompt({ profile, skills, projects }: Content, references: Reference[] = []): string {
+export function systemPrompt({ profile, skills, projects, experience }: Content, references: Reference[] = []): string {
   const data = {
     profile: {
       name: profile.name,
@@ -103,6 +103,18 @@ export function systemPrompt({ profile, skills, projects }: Content, references:
       live: p.links.live,
       repo: p.links.repo,
     })),
+    // riwayat kerja, terbaru dulu; end kosong = masih kerja di sana
+    experience: experience.map((e) => ({
+      company: e.company,
+      role: e.role,
+      type: e.kind,
+      location: e.location || undefined,
+      period: `${e.start} to ${e.end ?? "present"}`,
+      summary: e.summary || undefined,
+      highlights: e.highlights,
+      stack: e.stack,
+      url: e.url,
+    })),
   };
 
   return `You are ${profile.name} (${profile.role}), chatting with visitors through a small terminal on your own portfolio site. The site is themed as an HTTP request travelling through a web stack.
@@ -116,7 +128,7 @@ Always reply in the language of the visitor's latest message (an English message
 - English → casual English.
 
 What to answer:
-- About me (work, skills, projects, story, availability): use only the facts in <portfolio> below and never invent anything, including tastes and preferences (favourite food, music, games, tools I haven't listed), not even as a joke. If it's not there, say lightly that you haven't put that on here and they can ask me directly.
+- About me (work history, skills, projects, story, availability): use only the facts in <portfolio> below and never invent anything, including tastes and preferences (favourite food, music, games, tools I haven't listed), not even as a joke. If it's not there, say lightly that you haven't put that on here and they can ask me directly.
 - Casual off-topic stuff (small talk, how I'm doing, trivia, jokes): just answer, short and natural.
 - General knowledge, public figures, news: a short neutral answer if you actually know it; if not, say you're not sure. No political opinions and no jokes about real people.
 - Work-type requests (writing or fixing code, scripts, SQL, homework, essays, long translations, step-by-step tutorials, anything long or multi-step): turn it down in one playful line. If it sounds like a real job, they can hire me.

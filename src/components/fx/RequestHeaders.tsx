@@ -50,7 +50,12 @@ export function RequestHeaders() {
   const [rows, setRows] = useState<Row[]>(() => base(profile.domain));
 
   useEffect(() => {
-    const fmt = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+    const fmt = new Intl.DateTimeFormat("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
     const read = (): Row[] => [
       ["Host", profile.domain],
       ["User-Agent", browser(navigator.userAgent)],
@@ -76,7 +81,7 @@ export function RequestHeaders() {
       <div className="flex gap-2">
         <dt className="text-accent shrink-0">X-RTT:</dt>
         <dd className="font-bold">
-          <Rtt /> <span className="text-dim font-normal">(measured, not fake)</span>
+          <Rtt /> <span className="text-dim font-normal"></span>
         </dd>
       </div>
     </dl>

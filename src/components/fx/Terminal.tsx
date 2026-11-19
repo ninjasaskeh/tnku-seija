@@ -1,11 +1,18 @@
 "use client";
 
-import { type FormEvent, type Ref, useEffect, useId, useRef, useState } from "react";
+import {
+  type FormEvent,
+  type Ref,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
 import { MAX_LEN, useChat } from "@/components/chat/ChatProvider";
 import { useContent } from "@/components/ContentProvider";
 
 const QUICK = ["help", "whoami", "traceroute", "ping"];
-const ASK = ["What do you build?", "Which stack for APIs?", "Are you open to work?"];
+const ASK = ["Are you open to work?"];
 
 /**
  * Tampilan terminal. State percakapannya di ChatProvider, jadi terminal di section
@@ -38,12 +45,20 @@ export function Terminal({
   };
 
   return (
-    <div className={panel ? "flex h-full min-h-0 flex-col text-small" : "border border-line bg-ink text-small"}>
+    <div
+      className={
+        panel
+          ? "flex h-full min-h-0 flex-col text-small"
+          : "border border-line bg-ink text-small"
+      }
+    >
       {!panel && (
         <div className="flex items-center justify-between border-b border-line px-4 py-2 text-ash">
           <span className="truncate">visitor@{profile.domain}: ~</span>
           <span className="flex shrink-0 items-center gap-3">
-            <span className={busy ? "text-acid" : ""}>{busy ? "streaming…" : "AI online"}</span>
+            <span className={busy ? "text-acid" : ""}>
+              {busy ? "streaming…" : "AI online"}
+            </span>
             <span aria-hidden="true" className="flex gap-1.5">
               <i className="size-2 bg-acid" />
               <i className="size-2 bg-volt" />
@@ -80,29 +95,46 @@ export function Terminal({
             {l.kind === "in" && "$ "}
             {l.kind === "ai" && <span className="text-acid">← </span>}
             {l.text}
-            {l.kind === "ai" && busy && l.id === lines[lines.length - 1]?.id && <span className="caret ml-0.5" />}
+            {l.kind === "ai" &&
+              busy &&
+              l.id === lines[lines.length - 1]?.id && (
+                <span className="caret ml-0.5" />
+              )}
           </p>
         ))}
       </div>
-      <form onSubmit={submit} className="flex items-center gap-2 border-t border-line px-4 py-2">
+      <form
+        onSubmit={submit}
+        className="flex items-center gap-2 border-t border-line px-4 py-2"
+      >
         <label htmlFor={inputId} className="text-acid">
           <span aria-hidden="true">$</span>
           <span className="sr-only">Ask a question or type a command</span>
         </label>
-        <input
-          ref={inputRef}
-          id={inputId}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          maxLength={MAX_LEN}
-          autoComplete="off"
-          autoCapitalize="off"
-          spellCheck={false}
-          placeholder="ask anything, or: help"
-          enterKeyHint="send"
-          // 16px di HP: iOS nge-zoom otomatis kalau font input < 16px
-          className="min-w-0 flex-1 bg-transparent py-1 text-paper placeholder:text-ash/60 focus:outline-none max-sm:text-base"
-        />
+        <div className="relative flex min-w-0 flex-1 items-center">
+          <input
+            ref={inputRef}
+            id={inputId}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            maxLength={MAX_LEN}
+            autoComplete="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            placeholder="ask anything, or: help"
+            enterKeyHint="send"
+            // 16px di HP: iOS nge-zoom otomatis kalau font input < 16px
+            className="peer min-w-0 flex-1 bg-transparent py-1 pl-2.5 text-paper caret-acid placeholder:text-ash/60 focus:outline-none max-sm:text-base"
+          />
+          {/* kursor palsu yang kedip selama input kosong & belum difokus, biar keliatan bisa diketik.
+              Pas fokus diganti kursor asli browser (caret-acid), jadi nggak ada dua kursor. */}
+          {!value && (
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute top-1/2 left-0 h-[1.15em] w-0.5 -translate-y-1/2 bg-acid animate-[caret_1s_steps(1)_infinite] peer-focus:hidden motion-reduce:animate-none"
+            />
+          )}
+        </div>
         <button
           type="submit"
           disabled={busy}

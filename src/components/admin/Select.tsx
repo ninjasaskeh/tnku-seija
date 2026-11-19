@@ -1,8 +1,20 @@
 "use client";
 
-import { type KeyboardEvent, useId, useState } from "react";
+import createCache from "@emotion/cache";
+import { CacheProvider } from "@emotion/react";
+import { type KeyboardEvent, type ReactNode, useId, useState } from "react";
 import Select, { type ClassNamesConfig, type GroupBase } from "react-select";
 import CreatableSelect from "react-select/creatable";
+
+/*
+ * react-select pake emotion. Defaultnya emotion nyelipin <style> inline waktu SSR tapi nggak di client,
+ * jadi React 19 protes hydration mismatch. `compat = true` (mode extract-critical emotion) bikin server
+ * nggak nge-render <style> sama sekali; style-nya baru dimasukin ke <head> di client. Markup server &
+ * client jadi sama persis. Efeknya: sebelum hydrate, layout dasar react-select belum ada (sekejap).
+ */
+const emotionCache = createCache({ key: "rs", prepend: true });
+emotionCache.compat = true;
+const Emotion = ({ children }: { children: ReactNode }) => <CacheProvider value={emotionCache}>{children}</CacheProvider>;
 
 /*
  * react-select dengan gaya admin (mode `unstyled` + class Tailwind dari token tema).
@@ -53,16 +65,18 @@ export function SelectField({
       <label htmlFor={`${id}-input`} className="text-ash">
         {label}
       </label>
-      <Select<Opt, false>
-        instanceId={id}
-        inputId={`${id}-input`}
-        name={name}
-        options={options}
-        defaultValue={options.find((o) => o.value === defaultValue) ?? options[0]}
-        isSearchable={false}
-        unstyled
-        classNames={classNames<false>()}
-      />
+      <Emotion>
+        <Select<Opt, false>
+          instanceId={id}
+          inputId={`${id}-input`}
+          name={name}
+          options={options}
+          defaultValue={options.find((o) => o.value === defaultValue) ?? options[0]}
+          isSearchable={false}
+          unstyled
+          classNames={classNames<false>()}
+        />
+      </Emotion>
     </div>
   );
 }
@@ -111,25 +125,27 @@ export function TagField({
         {label}
         {required && <span className="text-acid"> *</span>}
       </label>
-      <CreatableSelect<Opt, true>
-        instanceId={id}
-        inputId={`${id}-input`}
-        name={name}
-        delimiter=","
-        isMulti
-        isClearable
-        menuIsOpen={false}
-        components={{ DropdownIndicator: null }}
-        inputValue={input}
-        value={value}
-        onChange={(v) => setValue(v)}
-        onInputChange={(v) => setInput(v)}
-        onKeyDown={onKeyDown}
-        onBlur={commit}
-        placeholder={placeholder}
-        unstyled
-        classNames={classNames<true>()}
-      />
+      <Emotion>
+        <CreatableSelect<Opt, true>
+          instanceId={id}
+          inputId={`${id}-input`}
+          name={name}
+          delimiter=","
+          isMulti
+          isClearable
+          menuIsOpen={false}
+          components={{ DropdownIndicator: null }}
+          inputValue={input}
+          value={value}
+          onChange={(v) => setValue(v)}
+          onInputChange={(v) => setInput(v)}
+          onKeyDown={onKeyDown}
+          onBlur={commit}
+          placeholder={placeholder}
+          unstyled
+          classNames={classNames<true>()}
+        />
+      </Emotion>
       {hint && <span className="mt-1 block text-micro text-ash">{hint}</span>}
     </div>
   );

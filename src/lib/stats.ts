@@ -2,14 +2,15 @@ import "server-only";
 import { priceFor } from "./chat";
 import { db } from "./db";
 
-const HOP_ORDER = ["hero", "about", "projects", "skills", "keepalive", "contact"] as const;
+const HOP_ORDER = ["hero", "about", "projects", "logs", "skills", "keepalive", "contact"] as const;
 const HOP_LABEL: Record<string, string> = {
   hero: "01 Request",
   about: "02 Handshake",
   projects: "03 Routes",
-  skills: "04 Query",
-  keepalive: "05 Keep-Alive",
-  contact: "06 Response",
+  logs: "04 Logs",
+  skills: "05 Query",
+  keepalive: "06 Keep-Alive",
+  contact: "07 Response",
 };
 
 export const RANGES = [7, 30, 90] as const;

@@ -2,13 +2,15 @@
 
 import { useEffect, useSyncExternalStore } from "react";
 import { useContent } from "@/components/ContentProvider";
-import { nav } from "@/data/profile";
 import { calm, initCalm, setCalm, subscribeCalm } from "@/lib/calm";
 import { CHAPTERS, stage, subscribeStage } from "@/lib/stage";
+import { DesktopNav } from "./DesktopNav";
+import { MobileNav } from "./MobileNav";
 
 /**
  * Header = address bar. Path-nya ikut hop yang lagi aktif (GET yourname.dev/handshake).
  * Tombol "Calm" di kanan matiin efek rame (lihat src/lib/calm.ts).
+ * Menu: layar lebar (lg+) = DesktopNav (link sebaris + penanda hop aktif); di bawah itu = tombol "Menu" yang buka drawer (MobileNav).
  * Stripnya transparan; cuma address bar + menu yang punya latar, biar scene 3D tetep keliatan.
  */
 export function SiteHeader() {
@@ -44,20 +46,12 @@ export function SiteHeader() {
           </span>
         </a>
         <div className="pointer-events-auto flex items-center gap-1.5 sm:gap-2">
-          <nav aria-label="Main" className="panel px-1.5 py-1 sm:px-2">
-            <ul className="flex gap-1.5 text-micro min-[360px]:gap-2 sm:gap-6 sm:text-small">
-              {nav.map((n, i) => (
-                <li key={n.href}>
-                  <a href={n.href} className="py-2 underline-offset-4 hover:underline">
-                    <span aria-hidden="true" className="text-accent max-md:hidden">
-                      {String(i + 2).padStart(2, "0")}{" "}
-                    </span>
-                    {n.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
+          <div className="max-lg:hidden">
+            <DesktopNav chapter={chapter} />
+          </div>
+          <div className="lg:hidden">
+            <MobileNav chapter={chapter} />
+          </div>
           <button
             type="button"
             aria-pressed={quiet}

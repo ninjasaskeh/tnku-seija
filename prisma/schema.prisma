@@ -1,5 +1,5 @@
 // Skema database portfolio.
-// - Konten (Profile, SkillGroup, Project): diedit lewat /admin, dibaca halaman utama (di-cache, tag "content").
+// - Konten (Profile, SkillGroup, Project, Experience): diedit lewat /admin, dibaca halaman utama (di-cache, tag "content").
 // - ChatSession / ChatMessage: log percakapan terminal AI + dasar rate limit.
 // - PageEvent: analytics anonim (kunjungan & hop yang dibuka).
 // Privasi: IP pengunjung nggak pernah disimpan, cuma hash-nya (ipHash = sha256(IP_SALT + ip)).
@@ -57,6 +57,27 @@ model Project {
   published   Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+/// Riwayat kerja (hop Logs). Urutan `order` = urutan baris di access.log (biasanya terbaru dulu).
+model Experience {
+  id         Int      @id @default(autoincrement())
+  company    String
+  role       String
+  /// "full-time" | "part-time" | "contract" | "freelance" | "internship"
+  kind       String   @default("full-time")
+  location   String   @default("")
+  /// "YYYY-MM"
+  start      String
+  /// "YYYY-MM", null = masih di sini
+  end        String?
+  summary    String   @default("")
+  highlights String[] @default([])
+  stack      String[] @default([])
+  url        String?
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model ChatSession {

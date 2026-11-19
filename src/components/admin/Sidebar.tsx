@@ -13,6 +13,7 @@ type Item = {
     | "/admin/story"
     | "/admin/skills"
     | "/admin/projects"
+    | "/admin/experience"
     | "/admin/easter-eggs";
   label: string;
   path: string;
@@ -34,6 +35,7 @@ const GROUPS: { title: string; items: Item[] }[] = [
       { href: "/admin/story", label: "Story", path: "~/keep-alive" },
       { href: "/admin/skills", label: "Skills", path: "~/skills" },
       { href: "/admin/projects", label: "Projects", path: "~/routes" },
+      { href: "/admin/experience", label: "Experience", path: "~/access.log" },
     ],
   },
 ];

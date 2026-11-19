@@ -9,6 +9,9 @@ const lines = (domain: string): [string, string][] => [
   [`Resolving ${domain}`, "12ms"],
   [`Connected to ${domain} port 443`, "24ms"],
   ["TLS 1.3 handshake", "38ms"],
+  // penghormatan: situs ini dibikin bareng Claude Code (header Via = perantara yang dilewati request).
+  // Sengaja pendek biar nggak kepotong di HP; detailnya ada di command `credits` terminal.
+  ["Via: 1.1 claude-code", "39ms"],
   ["Sending GET /you HTTP/2", "41ms"],
 ];
 

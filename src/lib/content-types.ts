@@ -38,8 +38,29 @@ export type Project = {
   thumbnail?: string;
 };
 
+/** Jenis kerjaan. Di hop Logs tiap jenis jadi "method" HTTP (lihat Experience.tsx). */
+export const EXPERIENCE_KINDS = ["full-time", "part-time", "contract", "freelance", "internship"] as const;
+export type ExperienceKind = (typeof EXPERIENCE_KINDS)[number];
+
+/** Satu kerjaan = satu baris di access.log (hop Logs). */
+export type Experience = {
+  company: string;
+  role: string;
+  kind: ExperienceKind;
+  location: string;
+  /** "YYYY-MM" */
+  start: string;
+  /** "YYYY-MM", kosong = masih di sini */
+  end?: string;
+  summary: string;
+  highlights: string[];
+  stack: string[];
+  url?: string;
+};
+
 export type Content = {
   profile: Profile;
   skills: SkillGroup[];
   projects: Project[];
+  experience: Experience[];
 };

@@ -2,13 +2,13 @@ import gsap from "gsap";
 
 /**
  * KONSEP: ROUND TRIP — pengunjung = satu HTTP request yang nembus seluruh stack.
- * Tiap bab = satu "hop": request dikirim → handshake → router/API → database → keep-alive (cerita) → response.
+ * Tiap bab = satu "hop": request dikirim → handshake → router/API → logs (riwayat kerja) → database → keep-alive (cerita) → response.
  *
  * "Panggung" = scene 3D layar penuh + warna halaman.
  * Tiap bab nentuin: bentuk kubus, warna latar, warna dither, posisi objek, dan info hop (buat HUD).
  * Mau ganti bentuk/warna per bab? Edit CHAPTERS di bawah.
  */
-export type ChapterId = "hero" | "about" | "projects" | "skills" | "keepalive" | "contact";
+export type ChapterId = "hero" | "about" | "projects" | "logs" | "skills" | "keepalive" | "contact";
 
 type Rgb = { r: number; g: number; b: number };
 type Pose = { x: number; y: number; s: number };
@@ -41,16 +41,17 @@ export const CHAPTERS: Record<ChapterId, Chapter> = {
   hero: { label: "Request", layer: "L0 / CLIENT", addr: "127.0.0.1", ms: 0, shape: "packet", dark: "#000000", light: "#c6ff00", fg: "#ffffff", pose: { x: 0.06, y: 0.0, s: 0.62 } },
   about: { label: "Handshake", layer: "L1 / TLS", addr: "10.0.0.1", ms: 38, shape: "lock", dark: "#000000", light: "#b18cff", fg: "#ffffff", pose: { x: -0.27, y: -0.02, s: 0.6 } },
   projects: { label: "Routes", layer: "L2 / API", addr: "10.0.2.4", ms: 112, shape: "route", dark: "#000000", light: "#c6ff00", fg: "#ffffff", pose: { x: 0.3, y: 0.22, s: 0.46 } },
-  skills: { label: "Query", layer: "L3 / DATABASE", addr: "10.0.3.9", ms: 486, shape: "db", dark: "#3b2bff", light: "#ffffff", fg: "#ffffff", pose: { x: 0.3, y: 0.02, s: 0.64 } },
-  keepalive: { label: "Keep-Alive", layer: "L4 / CONNECTION", addr: "10.0.4.2", ms: 820, shape: "heart", dark: "#b18cff", light: "#000000", fg: "#000000", pose: { x: 0.28, y: 0.04, s: 0.56 } },
+  logs: { label: "Logs", layer: "L3 / LOGGING", addr: "10.0.3.1", ms: 240, shape: "log", dark: "#000000", light: "#ffffff", fg: "#ffffff", pose: { x: 0.3, y: 0.04, s: 0.56 } },
+  skills: { label: "Query", layer: "L4 / DATABASE", addr: "10.0.4.9", ms: 486, shape: "db", dark: "#3b2bff", light: "#ffffff", fg: "#ffffff", pose: { x: 0.3, y: 0.02, s: 0.64 } },
+  keepalive: { label: "Keep-Alive", layer: "L5 / CONNECTION", addr: "10.0.5.2", ms: 820, shape: "heart", dark: "#b18cff", light: "#000000", fg: "#000000", pose: { x: 0.28, y: 0.04, s: 0.56 } },
   contact: { label: "Response", layer: "200 / OK", addr: "127.0.0.1", ms: 1240, shape: "ok", dark: "#c6ff00", light: "#000000", fg: "#000000", pose: { x: 0.28, y: 0.1, s: 0.58 } },
 };
 
-export const CHAPTER_ORDER: ChapterId[] = ["hero", "about", "projects", "skills", "keepalive", "contact"];
+export const CHAPTER_ORDER: ChapterId[] = ["hero", "about", "projects", "logs", "skills", "keepalive", "contact"];
 
 export const stage = {
   chapter: null as ChapterId | null,
-  /** id bentuk yang lagi dituju kubus: packet | lock | route0..N | db | heart | ok | cube */
+  /** id bentuk yang lagi dituju kubus: packet | lock | route0..N | log | db | heart | ok | cube */
   shape: "cube",
   project: 0,
   dark: hex("#000000"),

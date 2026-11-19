@@ -3,7 +3,7 @@ import { HopHeading } from "@/components/layout/Hop";
 import type { SkillGroup } from "@/lib/content-types";
 
 /**
- * Hop 04 — Query. Request udah sampai database: skill = isi tabel `skills`.
+ * Hop 05 — Query. Request udah sampai database: skill = isi tabel `skills`.
  * Tabelnya bisa difilter (WHERE layer IN ...). Database 3D muter di kanan.
  */
 export function Skills({ skills }: { skills: SkillGroup[] }) {
