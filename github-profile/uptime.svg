@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" width="900" height="300" role="img" aria-label="uptime: up 5 years, 317 days. Current streak 1 days, longest 6 days, 309 contributions since 2021.">
+<style>text{font-family:'Space Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+@keyframes in{from{opacity:0}to{opacity:1}}
+@keyframes blink{50%{opacity:0}}
+@keyframes pop{from{opacity:0;transform:scale(.2)}to{opacity:1;transform:none}}
+@keyframes grow{from{transform:scaleY(0)}to{transform:none}}
+.in{opacity:0;animation:in .2s ease-out forwards}
+.caret{animation:blink 1s steps(1) infinite}
+@media (prefers-reduced-motion:reduce){.in,.vx,.bar{animation:none!important;opacity:1}.caret{animation:none}}
+</style>
+
+<rect width="900" height="300" fill="#b18cff"/>
+<rect x=".5" y=".5" width="899" height="299" fill="none" stroke="#000000"/>
+<line x1="0" y1="34" x2="900" y2="34" stroke="#000000"/>
+<rect x="16" y="13" width="10" height="10" fill="#000000"/><text x="34" y="22" fill="#000000" font-size="13">$ uptime</text>
+<text x="884" y="22" fill="rgba(0,0,0,.55)" font-size="12" text-anchor="end">L5 / CONNECTION · 10.0.5.2</text>
+<text class="in" x="24" y="64" fill="#000000" font-size="14" xml:space="preserve" style="animation-delay:.15s"> 07:58  up 5 years, 317 days,  1 session,  load average: 0.29, 0.17, 0.03<tspan class="caret" fill="#000000">▌</tspan></text>
+<text class="in" x="24" y="82" fill="rgba(0,0,0,.55)" font-size="11" style="animation-delay:.3s">load average = contributions per day over 7 / 30 / 365 days</text>
+<g class="in" style="animation-delay:0.50s">
+<text x="24" y="104" fill="rgba(0,0,0,.55)" font-size="11">CURRENT STREAK</text>
+<text x="22" y="156" fill="#000000" style="font-family:'Archivo','Arial Black','Helvetica Neue',Arial,sans-serif;font-size:50px;font-weight:900;letter-spacing:-1px">1d</text>
+<text x="24" y="178" fill="rgba(0,0,0,.55)" font-size="11">connection open</text>
+</g><g class="in" style="animation-delay:0.65s">
+<text x="242" y="104" fill="rgba(0,0,0,.55)" font-size="11">LONGEST STREAK</text>
+<text x="240" y="156" fill="#000000" style="font-family:'Archivo','Arial Black','Helvetica Neue',Arial,sans-serif;font-size:50px;font-weight:900;letter-spacing:-1px">6d</text>
+<text x="242" y="178" fill="rgba(0,0,0,.55)" font-size="11">2024-09-23 → 2024-09-28</text>
+</g><line x1="228" y1="92" x2="228" y2="182" stroke="rgba(0,0,0,.35)"/><g class="in" style="animation-delay:0.80s">
+<text x="460" y="104" fill="rgba(0,0,0,.55)" font-size="11">CONTRIBUTIONS</text>
+<text x="458" y="156" fill="#000000" style="font-family:'Archivo','Arial Black','Helvetica Neue',Arial,sans-serif;font-size:50px;font-weight:900;letter-spacing:-1px">309</text>
+<text x="460" y="178" fill="rgba(0,0,0,.55)" font-size="11">since 2021</text>
+</g><line x1="446" y1="92" x2="446" y2="182" stroke="rgba(0,0,0,.35)"/><g class="in" style="animation-delay:0.95s">
+<text x="678" y="104" fill="rgba(0,0,0,.55)" font-size="11">FIRST PACKET</text>
+<text x="676" y="156" fill="#000000" style="font-family:'Archivo','Arial Black','Helvetica Neue',Arial,sans-serif;font-size:50px;font-weight:900;letter-spacing:-1px">2021</text>
+<text x="678" y="178" fill="rgba(0,0,0,.55)" font-size="11">2021-01-13</text>
+</g><line x1="664" y1="92" x2="664" y2="182" stroke="rgba(0,0,0,.35)"/>
+<line x1="0" y1="200" x2="900" y2="200" stroke="rgba(0,0,0,.35)"/>
+<text x="24" y="218" fill="rgba(0,0,0,.55)" font-size="11">SESSIONS PER YEAR</text>
+<text x="876" y="218" fill="rgba(0,0,0,.55)" font-size="11" text-anchor="end">snapshot 2026-11-25</text>
+<rect class="bar" x="24" y="250" width="54" height="8" fill="#000000" style="transform-box:fill-box;transform-origin:bottom;animation:grow .5s 1.00s both"/>
+<text x="24" y="276" fill="#000000" font-size="11">2021</text><text x="78" y="276" fill="rgba(0,0,0,.55)" font-size="11" text-anchor="end">20</text><rect class="bar" x="183.6" y="254" width="54" height="4" fill="#000000" style="transform-box:fill-box;transform-origin:bottom;animation:grow .5s 1.10s both"/>
+<text x="183.6" y="276" fill="#000000" font-size="11">2022</text><text x="237.6" y="276" fill="rgba(0,0,0,.55)" font-size="11" text-anchor="end">2</text><rect class="bar" x="343.2" y="242" width="54" height="16" fill="#000000" style="transform-box:fill-box;transform-origin:bottom;animation:grow .5s 1.20s both"/>
+<text x="343.2" y="276" fill="#000000" font-size="11">2023</text><text x="397.2" y="276" fill="rgba(0,0,0,.55)" font-size="11" text-anchor="end">59</text><rect class="bar" x="502.79999999999995" y="220" width="54" height="38" fill="#000000" style="transform-box:fill-box;transform-origin:bottom;animation:grow .5s 1.30s both"/>
+<text x="502.79999999999995" y="276" fill="#000000" font-size="11">2024</text><text x="556.8" y="276" fill="rgba(0,0,0,.55)" font-size="11" text-anchor="end">165</text><rect class="bar" x="662.4" y="243" width="54" height="15" fill="#000000" style="transform-box:fill-box;transform-origin:bottom;animation:grow .5s 1.40s both"/>
+<text x="662.4" y="276" fill="#000000" font-size="11">2025</text><text x="716.4" y="276" fill="rgba(0,0,0,.55)" font-size="11" text-anchor="end">51</text><rect class="bar" x="822" y="252" width="54" height="6" fill="#000000" style="transform-box:fill-box;transform-origin:bottom;animation:grow .5s 1.50s both"/>
+<text x="822" y="276" fill="#000000" font-size="11">2026</text><text x="876" y="276" fill="rgba(0,0,0,.55)" font-size="11" text-anchor="end">12</text>
+</svg>

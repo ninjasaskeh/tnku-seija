@@ -1,0 +1,31 @@
+# Regenerates the data cards in README.md: sniffer.svg, routes.svg, logs.svg, uptime.svg.
+# Manual only for now: add a `schedule:` trigger (e.g. cron "0 */12 * * *") once Actions can run on this account.
+# Locally: node scripts/sniffer.mjs ninjasaskeh > sniffer.svg && node scripts/cards.mjs ninjasaskeh
+name: sniffer
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/sniffer.mjs "${{ github.repository_owner }}" > sniffer.svg
+      - run: node scripts/cards.mjs "${{ github.repository_owner }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Commit if changed
+        run: |
+          git diff --quiet -- '*.svg' && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update data cards" -- '*.svg'
+          git push
